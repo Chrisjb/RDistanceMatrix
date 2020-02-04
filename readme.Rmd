@@ -1,0 +1,167 @@
+---
+title: "readme"
+author: "Chris"
+date: "02/02/2020"
+output: github_document
+always_allow_html: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## RDistanceMatrix
+
+This package contains functions to geocode locations and generate isochrones/isodistance polygons. 
+It also allows for the estimation of population or employment captured within the isochrone.
+
+### Installation:
+```{r  eval = FALSE}
+devtools::install_github('chrisjb/RDistanceMatrix')
+```
+### 1. make_isochrone
+The isochrone method generates a polygon of the total area to which one can travel from a given origin point. The origin point can be specified as either an address string to be geocoded, or a `data.frame` with a `lat` and `lng` column specifying the coordinates.
+
+### 1.1 mapbox method
+
+To use the mapbox method we need to get ourselves an API key and set it up on R. See section (x.x.x) for how to do this. 
+```{r message = FALSE}
+library(RDistanceMatrix)
+battersea_isochrone <- make_isochrone(site = 'Battersea Power Station', time = 30, method = 'mapbox', mode= 'driving')
+```
+
+By plotting our isochrone we can see that the *mapbox* method generates a pretty detailed polygon based on drive time from a given origin. 
+```{r}
+library(ggplot2)
+library(basemapR)
+ggplot() +
+  basemapR::base_map(bbox = sf::st_bbox(battersea_isochrone), increase_zoom = 2,basemap = 'google') +
+  geom_sf(data = battersea_isochrone, aes(fill = fillColor, color = color, alpha = opacity), show.legend = FALSE) 
+```
+
+**When to use method=mapbox:** The mapbox method has the highest level of detail and we can see that it sticks quite rigidly to the road network. This should be used as the default option if we want drive/walking/cycling isochrones from a given origin.
+
+**When not to use method=mapbox:** The mapbox method is less flexible than the alternative of `method=google` but has the benefit of being quick, easy and accurate. It does not support the creation of *transit* isochrones which use the public transport network. It also does not work in the reverse direction (`direction='in'`) so cannot generate an isochrone of origins that can travel *to* the destination site in a given time. Finally, the mapbox method does not support drive times in traffic so the isochrone can be seen as an 'average' drive time.
+
+
+### 1.2 google method
+The google method is more flexible but requires a bit more set up. We have a `multiplier` parameter to tune (see 1.2.1) and we will see that while broadly similar to the mapbox output, it does not have quite the same level of detail in it's ability to follow the road network out to its full extent.
+
+#### 1.2.1 tuning the multiplier parameter
+The google method uses the google distance matrix API to calculate the travel time to each of a detailed grid of points. The grid that we set up must be larger than the possible travel time so we consider all possible points. A `multiplier` parameter is used to ensure that the grid is an appropriate size. A multiplier of 1.0 means that we can, on average, travel 1km in 1 minute and so draws a grid of 10km x 10km for a 10 minute isochrone. The true multiplier will vary depending on the geography with central London being much lower, and some areas being higher than this.
+
+To tune the parameter we should use `method=google_guess`. This method uses a very small number of points in a grid to make an initial guess at an isochrone. It returns a `leaflet` map with the grid and isochrone as layers. A correctly tuned `multiplier` parameter should contain the entire isochrone inside of the grid of points, if it doesn't the multiplier should be increased. The isochrone should also reach at least one of the penultimate grid points to ensure we have a detailed enough initial guess.
+
+```{r eval = F}
+make_isochrone(site = 'battersea power station', time = 30, method = 'google_guess', mode= 'driving', multiplier = 0.4)
+```
+![correctly tuned multiplier parameter](./documentation_files/png/leaflet_tune_multiplier.png)
+
+
+
+#### 1.2.2 Creating an isochrone with google method
+Once we have a well calibrated `multiplier` parameter, the algorithm will create a more detailed version of the isochrone by chainging the method to `method='google'`. We have the choice of `high`, `medium` or `low` detail. The former will use more of our API quota and cost us more credits (see information on google api credits below). The default is medium detail which should be sufficient for most purposes.
+
+```{r}
+battersea_isochrone_google <- make_isochrone(site = 'Battersea Power Station', time = 30, method = 'google', detail = 'med',  mode= 'driving', multiplier = 0.4)
+```
+
+If we compare the results of our mapbox isochrone (red) with the google isochrone (blue), we see that the results are broadly similar but the goolgle one is more generalised. The mapbox version does a better job at sticking to the road network and following the roads out as long as to their 30 minute extents. For this reason, we should prefer the mapbox version for tasks that can be accomplished with the mapbox API.
+
+```{r}
+library(ggplot2)
+library(basemapR)
+ggplot() +
+  basemapR::base_map(bbox = sf::st_bbox(battersea_isochrone), increase_zoom = 2,basemap = 'google') +
+  geom_sf(data = battersea_isochrone, aes(fill = fillColor, color = color, alpha = opacity), show.legend = FALSE) +
+  geom_sf(data = battersea_isochrone_google, fill = 'blue', color = 'blue', alpha = 0.3)
+```
+
+We can increase the detail of our google isochrone (costing us more credits):
+
+```{r}
+battersea_isochrone_google_high <- make_isochrone(site = 'Battersea Power Station', time = 30, method = 'google', detail = 'high',  mode= 'driving', multiplier = 0.4)
+```
+
+This gives us a more detailed isochrone, but we also get a few 'islands' and 'holes' where the algorithm found points that could be reached within 30minutes, but where there was a point in between which couldn't (perhaps the point identified was in a park or otherwise off the road network).
+
+```{r}
+library(ggplot2)
+library(basemapR)
+ggplot() +
+  basemapR::base_map(bbox = sf::st_bbox(battersea_isochrone), increase_zoom = 2,basemap = 'google') +
+  geom_sf(data = battersea_isochrone, aes(fill = fillColor, color = color, alpha = opacity), show.legend = FALSE) +
+  geom_sf(data = battersea_isochrone_google_high, fill = 'blue', color = 'blue', alpha = 0.3)
+```
+
+
+#### 1.2.3 Other options with the google method
+With the google method we have the ability to reverse the direction (what origins are there that can we leave from and arrive at the site within x minutes?). We can also set the departure time to a peak hour to get the isochrone accounting for traffic, or we can use `mode=transit` to get an isochrone using public transport.
+
+```{r}
+battersea_isochrone_google_pt <- make_isochrone(site = 'Battersea Power Station', time = 30, method = 'google', detail = 'high',  mode= 'transit', multiplier = 0.4)
+```
+
+With public transport (blue) we can't get as far from Battersea Power station as we could by car (red).
+````{r}
+ggplot() +
+  basemapR::base_map(bbox = sf::st_bbox(battersea_isochrone), increase_zoom = 2,basemap = 'google') +
+  geom_sf(data = battersea_isochrone_google, fill = "#bf4040", color = "#bf4040", alpha = .33, show.legend = FALSE) +
+  geom_sf(data = battersea_isochrone_google_pt, fill = 'blue', color = 'blue', alpha = 0.33)
+```
+
+let's see what happens with traffic. Note that the `departing` parameter must be set to a date and time in the future.
+```{r}
+battersea_isochrone_google_traffic <- make_isochrone(site = 'Battersea Power Station', time = 30, method = 'google', detail = 'med',  mode= 'driving', multiplier = 0.25,
+                                                departing = '2020-03-02 08:00:00')
+```
+
+In 8am traffic (blue) we can now only travel a bit further then by public transport (green).
+```{r}
+ggplot() +
+  basemapR::base_map(bbox = sf::st_bbox(battersea_isochrone), increase_zoom = 2,basemap = 'google') +
+  geom_sf(data = battersea_isochrone_google, fill = "#bf4040", color = "#bf4040", alpha = .33, show.legend = FALSE) +
+  geom_sf(data = battersea_isochrone_google_traffic, fill = 'blue', color = 'blue', alpha = .33) +
+  geom_sf(data = battersea_isochrone_google_pt, fill = "green", color = "green", alpha = .33, show.legend = FALSE) 
+```
+
+
+Is it better getting *to* battersea than *from*?
+
+```{r}
+battersea_isochrone_google_traffic_inbound <- make_isochrone(site = 'Battersea Power Station', time = 30, direction = 'in', 
+                                                        method = 'google', detail = 'med',  mode= 'driving', multiplier = 0.25,
+                                                        departing = '2020-03-02 08:00:00')
+```
+
+Inbound travel time (green) seems to be broadly similar to outbound time (blue) in this case.
+
+```{r}
+ggplot() +
+  basemapR::base_map(bbox = sf::st_bbox(battersea_isochrone), increase_zoom = 2,basemap = 'google') +
+  geom_sf(data = battersea_isochrone_google_traffic, fill = 'blue', color = 'blue', alpha = .33) +
+  geom_sf(data = battersea_isochrone_google_traffic_inbound, fill = "green", color = "green", alpha = .33, show.legend = FALSE)
+```
+
+
+### 2. make_isodistance
+Note that for this method, only `method=google` is available. 
+
+
+
+### 3. get population and employment within a boundary
+#### 3.1 get_population_within
+Note that for this method, only `method=google` is available. 
+
+#### 3.2 get_employment_within
+
+### Getting a google API Key
+
+
+#### Google API Credits
+
+
+### Getting a mapbox API Key
+
+
+### Getting a Nomis API Key

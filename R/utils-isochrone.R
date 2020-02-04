@@ -1,0 +1,210 @@
+#' utility functions used in make_distance_isochrone.R and make_time_isochrone.R
+approx_grid <- function(lat,lng,km) {
+  dist_lat <- km/6378 * (180/pi)
+  dist_lng <- km/6387 *(180/pi) / cos(lat * pi/180)
+  return(data.frame(lat=dist_lat, lng = dist_lng))
+}
+
+
+dist_url <- function(origin, dest, mode, departing = F, model = 'best_guess',
+                     api_key = api_key) {
+
+  # enter departing in form: YYYY-MM-DD 08:00:00
+  if(departing != F & !grepl('[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2,}',departing)) {
+    stop(paste0('departure time must either be set to FALSE or a time in the format YYYY-MM-DD HH:MM:SS. Note the time is local UK time.'))
+  } else if(departing != F) {
+    # if departure time is set, set it to a time in the future (later today or tomorrow depending on whether or not the time has already passed today.
+
+    # google maps wants it in the format in time elapsed since 01/01/1970 UTC.
+
+    # has the entered time already passed today?
+    if(Sys.time() > as.POSIXct(departing)) {
+      stop(paste0('your departure time ', departing, 'is not in the future.'))
+    } else {
+      departure_time <- paste0('&departure_time=',as.character(as.numeric(as.POSIXct(departing))),'&traffic_model=', model)
+    }
+  } else if(departing == F) {
+    departure_time <- ''
+  }
+
+  # create web address
+  root <- "https://maps.googleapis.com/maps/api/distancematrix/json"
+  i <- paste0(root, "?origins=", origin, "&destinations=", dest, "&mode=",mode,
+              departure_time, "&key=", api_key)
+
+  return(utils::URLencode(i))
+
+
+}
+
+
+distance_from_origins <- function(origin, dest, mode='driving', departing = F, api_key = api_key) {
+  if(!(mode %in% c('driving','walking','cycle','cycling','bicycle','transit'))){
+    stop('mode must be one of: driving, walking, cycle, transit')
+  }
+
+  dists_vec <- c()
+  time_vec <- c()
+
+  # split into lots of 100 - google maps can't handle more than that
+  lots <- length(origin) %/% 100
+  if(length(dest) %% 100 != 0) {
+    lots <- lots + 1
+  }
+
+  for(i in 1:(lots)){
+
+    origin_txt <- gsub(' ', "+", paste0(origin[(1+100*(i-1)):(100*i)][!is.na(origin[(1+100*(i-1)):(100*i)])],collapse='|'))
+
+    if(origin_txt == ''){
+      break
+    }
+    u <- dist_url(origin_txt,dest,mode,departing,api_key=api_key)
+
+    message(paste0('Trying URL: ', gsub(api_key, 'SECRET', u)))
+    doc <- RCurl::getURL(u)
+    x <- jsonlite::fromJSON(doc)
+    if(x$status=="OK" & departing !=F & mode =='driving') {
+      tbl <- lapply(x$rows$elements,function(x) unlist(x) %>% as.data.frame.list(stringsAsFactors = F) ) %>% dplyr::bind_rows()
+      dists_vec <- c(dists_vec,tbl$distance.value)
+      time_vec <- c(time_vec,tbl$duration_in_traffic.value)
+      Sys.sleep(1.5)
+
+    } else if(x$status=="OK") {
+      tbl <- lapply(x$rows$elements,function(x) unlist(x) %>% as.data.frame.list(stringsAsFactors = F) ) %>% dplyr::bind_rows()
+      dists_vec <- c(dists_vec,tbl$distance.value)
+      time_vec <- c(time_vec,tbl$duration.value)
+      Sys.sleep(1.5)
+
+    } else{
+      stop(paste0('Error in url: ', u))
+    }
+
+  }
+
+  return(list(dist = dists_vec,
+              time = time_vec))
+
+}
+
+
+
+distance_to_destinations <- function(origin,dest,mode='walking',departing=F,model='best_guess',api_key = api_key){
+
+  dists_vec <- c()
+  time_vec <- c()
+  lots <- length(dest) %/% 100
+
+  if(length(dest) %% 100 != 0) {
+    lots <- lots + 1
+  }
+
+  for(i in 1:(lots)){
+    # set up string for up to 100 destinations
+    dest_txt <- gsub(' ',"+",paste0(dest[(1+100*(i-1)):(100*i)][!is.na(dest[(1+100*(i-1)):(100*i)])],collapse='|'))
+    if(dest_txt == ''){
+      break
+    }
+    u <- dist_url(origin,dest_txt,mode,departing,model,api_key=api_key)
+    message(paste0('Trying URL: ', gsub(api_key, 'SECRET', u)))
+    doc <- RCurl::getURL(u)
+    x <- jsonlite::fromJSON(doc)
+
+    # if valid result and we have set departure time for driving, get time in traffic
+    if(x$status=="OK" & length(x$rows$elements[[1]]) >1 & mode=='driving' & departing !=F) {
+      dist <- x$rows$elements[[1]]$distance$value
+      time <- x$rows$elements[[1]]$duration_in_traffic$value
+      dists_vec <- c(dists_vec,dist)
+      time_vec <- c(time_vec,time)
+      Sys.sleep(1.5)
+    } else if(x$status=="OK" & length(x$rows$elements[[1]]) >1) {
+      dist <- x$rows$elements[[1]]$distance$value
+      time <- x$rows$elements[[1]]$duration$value
+      dists_vec <- c(dists_vec,dist)
+      time_vec <- c(time_vec,time)
+      Sys.sleep(1.5)
+    } else {
+      stop(paste0('Error in url: ', u))
+    }
+
+  }
+
+  return(list(dist = dists_vec,
+              time = time_vec))
+}
+
+
+check_request_valid <- function(method, mapbox_api_key, google_api_key, direction, site, time, detail, mode, departing, multiplier) {
+  # ensure API Key is correct
+  if(method %in% c('google','google_guess') ){
+    assign('api_key', google_api_key, envir = parent.frame())
+    if(Sys.getenv('google_api_key') == ''){
+      stop('please set google api key (see set_google_api)')
+    }
+  } else if(method == 'mapbox'){
+    assign('api_key', mapbox_api_key, envir = parent.frame())
+    if(Sys.getenv('mapbox_api_key') == ''){
+      stop('please set mapbox api key (see set_mapbox_api)')
+    }
+    if(direction == 'in'){
+      stop('mapbox method does not support direction "in"')
+    }
+  } else{
+    stop('method must be one of google or mapbox')
+  }
+
+  # ensure direction correctly specified
+  if(!direction %in% c('in', 'out')){
+    stop(paste0('direction parameter must be one of "in" or "out". "in" builds an isochrone based on travel times travelling towards the site. "out" builds the isochrone travelling away from the site.'))
+  }
+  # ensure site is either a data frame containing lat and lon, or a string to be geocoded
+  if(is.data.frame(site)){
+    if('lat' %in% names(site)) {
+      message('found column "lat" in site dataframe...')
+    } else {
+      stop('If the site parameter is a dataframe it should contain a column named "lat".')
+    }
+
+    if('lng' %in% names(site)){
+      message('found column "lng" in site dataframe...')
+    } else if('lon' %in% names(site)){
+      message('found column "lon" in site dataframe...')
+      assign('site', rename(site, lng = lon), envir = parent.frame())
+    } else {
+      stop('If the site parameter is a dataframe it should contain a column named "lng".')
+    }
+  } else if(!is.character(site)){
+    stop('Site should be a dataframe or a character string to be geocoded.')
+  }
+
+  # time should be numeric
+  if(!is.numeric(time)){
+    stop('Time should be specified as a numeric value (time in minutes)')
+  }
+
+  # detail should be correctly specified
+  if(!detail %in% c('low', 'med', 'medium','high')) {
+    stop('Detail should be one of low, med or high')
+  }
+
+  # mode should be valid
+  if(!(mode %in% c('driving','walking','cycle','cycling','bicycle','transit'))){
+    stop('mode must be one of: driving, walking, cycle, transit')
+  }
+
+  # departure time should be valid, if set
+  if(departing != F & !grepl('[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2,}',departing)) {
+    stop(paste0('departure time must either be set to FALSE or a time in the format YYYY-MM-DD HH:MM:SS. Note the time is local UK time.'))
+  } else if(departing != F) {
+    # if departure time is set, set it to a time in the future (later today or tomorrow depending on whether or not the time has already passed today.
+
+    # google maps wants it in the format in time elapsed since 01/01/1970 UTC.
+
+    # has the entered time already passed today?
+    if(Sys.time() > as.POSIXct(departing)) {
+      stop(paste0('your departure time ', departing, 'is not in the future.'))
+    }
+  }
+
+
+}
