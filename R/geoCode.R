@@ -45,7 +45,7 @@ geoCode <- function(address, api_key = Sys.getenv('google_api_key'), verbose=FAL
       } else {
         return(data.frame(lat, lng, type, address)[1,])
       }
-      Sys.sleep(0.5)
+      Sys.sleep(0.1)
     } else {
       message('API returned status: ', x$status)
       return(data.frame(lat=NA,lng=NA,type=NA, address=NA))

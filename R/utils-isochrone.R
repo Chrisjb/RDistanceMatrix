@@ -14,9 +14,6 @@ dist_url <- function(origin, dest, mode, departing = F, model = 'best_guess',
     stop(paste0('departure time must either be set to FALSE or a time in the format YYYY-MM-DD HH:MM:SS. Note the time is local UK time.'))
   } else if(departing != F) {
     # if departure time is set, set it to a time in the future (later today or tomorrow depending on whether or not the time has already passed today.
-
-    # google maps wants it in the format in time elapsed since 01/01/1970 UTC.
-
     # has the entered time already passed today?
     if(Sys.time() > as.POSIXct(departing)) {
       stop(paste0('your departure time ', departing, 'is not in the future.'))
@@ -38,7 +35,7 @@ dist_url <- function(origin, dest, mode, departing = F, model = 'best_guess',
 }
 
 
-distance_from_origins <- function(origin, dest, mode='driving', departing = F, api_key = api_key) {
+distance_from_origins <- function(origin, dest, mode='driving', departing = F, model='best_guess', api_key = api_key) {
   if(!(mode %in% c('driving','walking','cycle','cycling','bicycle','transit'))){
     stop('mode must be one of: driving, walking, cycle, transit')
   }
@@ -59,7 +56,7 @@ distance_from_origins <- function(origin, dest, mode='driving', departing = F, a
     if(origin_txt == ''){
       break
     }
-    u <- dist_url(origin_txt,dest,mode,departing,api_key=api_key)
+    u <- dist_url(origin_txt,dest,mode,departing,model, api_key=api_key)
 
     message(paste0('Trying URL: ', gsub(api_key, 'SECRET', u)))
     doc <- RCurl::getURL(u)
@@ -68,13 +65,13 @@ distance_from_origins <- function(origin, dest, mode='driving', departing = F, a
       tbl <- lapply(x$rows$elements,function(x) unlist(x) %>% as.data.frame.list(stringsAsFactors = F) ) %>% dplyr::bind_rows()
       dists_vec <- c(dists_vec,tbl$distance.value)
       time_vec <- c(time_vec,tbl$duration_in_traffic.value)
-      Sys.sleep(1.5)
+      Sys.sleep(0.1)
 
     } else if(x$status=="OK") {
       tbl <- lapply(x$rows$elements,function(x) unlist(x) %>% as.data.frame.list(stringsAsFactors = F) ) %>% dplyr::bind_rows()
       dists_vec <- c(dists_vec,tbl$distance.value)
       time_vec <- c(time_vec,tbl$duration.value)
-      Sys.sleep(1.5)
+      Sys.sleep(0.1)
 
     } else{
       stop(paste0('Error in url: ', u))
@@ -89,7 +86,7 @@ distance_from_origins <- function(origin, dest, mode='driving', departing = F, a
 
 
 
-distance_to_destinations <- function(origin,dest,mode='walking',departing=F,model='best_guess',api_key = api_key){
+distance_to_destinations <- function(origin,dest,mode,departing=F,model='best_guess',api_key = api_key){
 
   dists_vec <- c()
   time_vec <- c()
@@ -105,24 +102,31 @@ distance_to_destinations <- function(origin,dest,mode='walking',departing=F,mode
     if(dest_txt == ''){
       break
     }
+
     u <- dist_url(origin,dest_txt,mode,departing,model,api_key=api_key)
     message(paste0('Trying URL: ', gsub(api_key, 'SECRET', u)))
-    doc <- RCurl::getURL(u)
-    x <- jsonlite::fromJSON(doc)
+
+    res <- httr::GET(u)
+    err <- httr::http_error(res)
+    status <- httr::http_status(res)
+    if(err){
+      stop(glue::glue('API request failed with error {err}'))
+    }
+    x <- httr::content(res, simplifyVector=TRUE)
 
     # if valid result and we have set departure time for driving, get time in traffic
-    if(x$status=="OK" & length(x$rows$elements[[1]]) >1 & mode=='driving' & departing !=F) {
+    if(status$category=="Success"  & mode=='driving' & departing !=F) {
       dist <- x$rows$elements[[1]]$distance$value
       time <- x$rows$elements[[1]]$duration_in_traffic$value
       dists_vec <- c(dists_vec,dist)
       time_vec <- c(time_vec,time)
-      Sys.sleep(1.5)
-    } else if(x$status=="OK" & length(x$rows$elements[[1]]) >1) {
+      Sys.sleep(0.1)
+    } else if(status$category=="Success") {
       dist <- x$rows$elements[[1]]$distance$value
       time <- x$rows$elements[[1]]$duration$value
       dists_vec <- c(dists_vec,dist)
       time_vec <- c(time_vec,time)
-      Sys.sleep(1.5)
+      Sys.sleep(0.1)
     } else {
       stop(paste0('Error in url: ', u))
     }
@@ -132,6 +136,7 @@ distance_to_destinations <- function(origin,dest,mode='walking',departing=F,mode
   return(list(dist = dists_vec,
               time = time_vec))
 }
+
 
 
 check_request_valid <- function(method, mapbox_api_key, google_api_key, direction, site, time, detail, mode, departing, multiplier) {

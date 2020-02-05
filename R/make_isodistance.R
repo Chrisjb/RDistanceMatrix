@@ -24,8 +24,7 @@
 #'
 #'
 #' @export
-#'
-#'
+
 make_isodistance <- function(site, direction = 'out', distance, pts = 10, mode= 'driving', api_key = Sys.getenv('google_api_key')){
   # direction parameter takes values:
   # 'in': going from multiple origins to a single destination
