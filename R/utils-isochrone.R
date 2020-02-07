@@ -57,17 +57,24 @@ distance_from_origins <- function(origin, dest, mode='driving', departing = F, m
       break
     }
     u <- dist_url(origin_txt,dest,mode,departing,model, api_key=api_key)
-
-    message(paste0('Trying URL: ', gsub(api_key, 'SECRET', u)))
-    doc <- RCurl::getURL(u)
-    x <- jsonlite::fromJSON(doc)
-    if(x$status=="OK" & departing !=F & mode =='driving') {
+    u_secret <- gsub(api_key, '<api_key_here>', u)
+    if(lots > 1){
+      message(glue::glue('Trying URL: {i} of {lots}', ))
+    }
+    doc <- httr::GET(u)
+    status <- httr::http_status(doc)
+    err <- httr::http_error(doc)
+    if(err){
+      stop(glue::glue('API request failed with error: {status$reason}\n attempted url (api key masked): {u_secret}'))
+    }
+    x <- httr::content(doc, simplifyVector = TRUE)
+    if(status$category=="Success"  & departing !=F & mode =='driving') {
       tbl <- lapply(x$rows$elements,function(x) unlist(x) %>% as.data.frame.list(stringsAsFactors = F) ) %>% dplyr::bind_rows()
       dists_vec <- c(dists_vec,tbl$distance.value)
       time_vec <- c(time_vec,tbl$duration_in_traffic.value)
       Sys.sleep(0.1)
 
-    } else if(x$status=="OK") {
+    } else if(status$category=="Success") {
       tbl <- lapply(x$rows$elements,function(x) unlist(x) %>% as.data.frame.list(stringsAsFactors = F) ) %>% dplyr::bind_rows()
       dists_vec <- c(dists_vec,tbl$distance.value)
       time_vec <- c(time_vec,tbl$duration.value)
@@ -104,13 +111,17 @@ distance_to_destinations <- function(origin,dest,mode,departing=F,model='best_gu
     }
 
     u <- dist_url(origin,dest_txt,mode,departing,model,api_key=api_key)
-    message(paste0('Trying URL: ', gsub(api_key, 'SECRET', u)))
+
+    u_secret <- gsub(api_key, '<api_key_here>', u)
+    if(lots > 1){
+      message(glue::glue('Trying URL: {i} of {lots}', ))
+    }
 
     res <- httr::GET(u)
     err <- httr::http_error(res)
     status <- httr::http_status(res)
     if(err){
-      stop(glue::glue('API request failed with error {err}'))
+      stop(glue::glue('API request failed with error: {status$reason}\n attempted url (api key masked): {u_secret}'))
     }
     x <- httr::content(res, simplifyVector=TRUE)
 
@@ -136,6 +147,9 @@ distance_to_destinations <- function(origin,dest,mode,departing=F,model='best_gu
   return(list(dist = dists_vec,
               time = time_vec))
 }
+
+
+
 
 
 

@@ -9,7 +9,7 @@ url <- function(address, return.call = "json", sensor = "false",
 isLatLng <- function(address) {
   if(is.na(address)){
     return(FALSE)
-  } else if(str_detect(address,'[A-Za-z]{1,}')){
+  } else if(stringr::str_detect(address,'[A-Za-z]{1,}')){
     return(FALSE)
   } else {
     stringr::str_detect(address, '[-\\d ]{1,}.[\\d ]{1,}[,]{1}[-\\d ]{1,}.[\\d]{1,}')

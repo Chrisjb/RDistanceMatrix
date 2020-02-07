@@ -4,7 +4,7 @@
 \alias{get_population_within}
 \title{Get Population Within Boundary}
 \usage{
-get_population_within(boundary, year, age = "all",
+get_population_within(boundary, year = "latest", age = "all",
   api_key = Sys.getenv("nomis_api_key"))
 }
 \arguments{
@@ -24,7 +24,10 @@ Fetches the population within a given boundary. The boundary is given as an sf f
 The population data is fetched from NOMIS population estimates for small areas.
 }
 \examples{
-pop <- get_population_within(shp, 2018, age = 'all')
-
+iso <- make_isochrone(site = 'SE1 9SG', time = 30, method = 'mapbox', mode = 'driving')
+pop <- get_population_within(iso, 'latest', age = 'all')
+# total employment within isochrone:
+pop \%>\%
+ summarise(total_pop = sum(population_within))
 
 }

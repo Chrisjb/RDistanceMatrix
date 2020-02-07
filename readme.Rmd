@@ -18,6 +18,9 @@ It also allows for the estimation of population or employment captured within th
 ### Installation:
 ```{r  eval = FALSE}
 devtools::install_github('chrisjb/RDistanceMatrix')
+
+# for the examples below also install
+devtools::install_github('chrisjb/basemapR')
 ```
 ### 1. make_isochrone
 The isochrone method generates a polygon of the total area to which one can travel from a given origin point. The origin point can be specified as either an address string to be geocoded, or a `data.frame` with a `lat` and `lng` column specifying the coordinates.
@@ -145,15 +148,113 @@ ggplot() +
 
 
 ### 2. make_isodistance
-Note that for this method, only `method=google` is available. 
 
 
 
-### 3. get population and employment within a boundary
-#### 3.1 get_population_within
-Note that for this method, only `method=google` is available. 
 
-#### 3.2 get_employment_within
+
+### 3. get_distance
+
+
+
+
+### 4. geoCode
+`geocode` uses the google geocoding API to geocode an address or set of coordinates.
+`geocode_mapbox` uses the mapbox geocoding API to geocode an address or set of coordinates.
+
+Both require an API key to use for the respective APIs. See sections below on getting an API key.
+
+```{r}
+library(RDistanceMatrix)
+geocode(address = 'Ulverston, Cumbria')
+```
+
+By default the API will return multiple potential matches for our site. 
+```{r}
+geocode_mapbox(address = 'Bath Abbey, Bath, UK', return_all = T)
+```
+Setting `return_all = F` can be useful when we want only the first identified location returned. The first location tends to be the best guess at the intended address.
+```{r}
+geocode_mapbox(address = 'Bath Abbey, Bath, UK', return_all = F)
+```
+
+
+We can always explore the locations returned in leaflet
+```{r eval =FALSE}
+library(leaflet)
+bath <- geocode_mapbox(address = 'Bath Abbey, Bath, UK', return_all = T)
+
+leaflet() %>%
+  addTiles() %>%
+  addAwesomeMarkers(data = bath, lng = ~lng, lat= ~lat, popup = ~type) %>%
+  addAwesomeMarkers(data = bath[1,], lng = ~lng, lat= ~lat, popup = 'best_guess', 
+                    icon = ~awesomeIcons('star',markerColor = 'red'))
+```
+### 5. get population and employment within a boundary
+#### 5.1 get_population_within
+This function aims to estimate the population within an `sf` polygon. It can be used in conjunction with `make_isochrone` or `make_isodistance` which both return `sf` objects.
+
+The function works by intersecting [Lower Layer Super Output Areas](https://en.wikipedia.org/wiki/Lower_Layer_Super_Output_Area) (lsoas) with the input polygon. The population is then fetched from the [NOMIS API](https://www.nomisweb.co.uk/query/select/getdatasetbytheme.asp?) for each LSOA that overlaps with our input polygon.
+
+The dataset returned contains population data for each LSOA within our boundary (`population`), the percentage of the LSOA that lies within our boundary (`overlap`), and the *estimated* population that actually lies within the boundary (`population_within`). The `population_within` column assumes that population is evenly distributed throughout the LSOA so is an **estimate rather than a precise figure**.
+
+```{r}
+iso <- make_isochrone(site = 'bath abbey, bath, uk', time = 30, method = 'mapbox', mode = 'driving')
+pop_all_ages <- get_population_within(iso, year ='latest',age = 'all')
+
+glimpse(pop_all_ages)
+```
+
+We can also split by age group. Options include `working`,`five_year` and `sya` (single year of age).
+```{r}
+library(dplyr)
+pop_working <- get_population_within(iso, year ='latest',age = 'working')
+
+pop_working %>%
+  group_by(age) %>%
+  summarise(estimated_pop = sum(population_within))
+```
+
+#### 5.2 get_employment_within
+This function aims to estimate the employment within an `sf` polygon. It can be used in conjunction with `make_isochrone` or `make_isodistance` which both return `sf` objects.
+
+The function works by intersecting [Lower Layer Super Output Areas](https://en.wikipedia.org/wiki/Lower_Layer_Super_Output_Area) (lsoas) with the input polygon. The employment data is then fetched from the [NOMIS API](https://www.nomisweb.co.uk/query/select/getdatasetbytheme.asp?) using the Business Register and Employment Survey dataset.
+
+The dataset returned contains employment data for each LSOA within our boundary (`employment`), the percentage of the LSOA that lies within our boundary (`overlap`), and the *estimated* employment that actually lies within the boundary (`employment_within`). The `employment_within` column assumes that employment is evenly distributed throughout the LSOA so is an **estimate rather than a precise figure**.
+
+```{r}
+iso <- make_isochrone(site = 'Barrow-in-Furness, Cumrbia', time = 20, method = 'mapbox', mode = 'driving')
+emp_all_ind <- get_employment_within(iso, year ='latest',industry =  'all')
+
+glimpse(emp_all_ind)
+```
+
+If we set the `type` option to 'employees' rather than 'employment', we can split by part-time/full-time employees. 
+```{r}
+library(dplyr)
+pt_ft <- get_employment_within(iso, year ='latest',type = 'employees', split = TRUE)
+
+pt_ft %>%
+  group_by(employment_status_name) %>%
+  summarise(estimated_emp = sum(employment_within)) %>%
+  tidyr::pivot_wider(names_from = employment_status_name, values_from = estimated_emp) %>%
+  mutate(full_time_equiv = 0.5*`Part-time employees` + `Full-time employees`)
+```
+
+We can also get the industry break down of employees in the area. Options include:
+* `all` for no industry breakdown
+* `broad` for broad groups
+* `sections` for sections
+* `2digit` for two digit SIC codes
+
+```{r}
+library(dplyr)
+emp_broad <- get_employment_within(iso, year ='latest',industry = 'broad')
+
+emp_broad %>% 
+  group_by(industry_id, industry_name) %>%
+  summarise(estimated_emp = sum(employment_within))  
+```
 
 ### Getting a google API Key
 

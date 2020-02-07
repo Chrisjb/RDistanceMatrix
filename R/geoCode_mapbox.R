@@ -16,7 +16,7 @@
 #' @import stringr
 #'
 #' @examples
-#' geoCode_mapbox('London Bridge, London, UK', return_all = F)
+#' geocode_mapbox('London Bridge, London, UK', return_all = F)
 #'
 #' #  lat        lng             type                           address
 #' #  51.50788 -0.0877321 GEOMETRIC_CENTER London Bridge, London SE1 9RA, UK
@@ -25,7 +25,7 @@
 
 
 
-geoCode_mapbox <- function(address, api_key=Sys.getenv('mapbox_api_key'),return_all = TRUE) {
+geocode_mapbox <- function(address, api_key=Sys.getenv('mapbox_api_key'),return_all = TRUE) {
   # if address is in lat lng form, do not geocode.
   if(isLatLng(address)){
     return(data.frame(lat=getLat(address),lng=getLng(address),type=NA, address='User Defined Location'))

@@ -20,12 +20,15 @@
 #' @importFrom httr GET content http_type http_error
 #'
 #' @examples
-#' emp <- get_employment_within(shp, 2018, industry = 'all')
-#'
+#' iso <- make_isochrone(site = 'SE1 9SG', time = 30, method = 'mapbox', mode = 'driving')
+#' emp <- get_employment_within(shp, 'latest', industry = 'all')
+#' # total employment within isochrone:
+#' emp %>%
+#'  summarise(total_emp = sum(employment_within))
 #'
 #' @export
 
-get_employment_within <- function(boundary, year, type = 'employment', split = F, industry = 'all', api_key = Sys.getenv('nomis_api_key')){
+get_employment_within <- function(boundary, year = 'latest', type = 'employment', split = F, industry = 'all', api_key = Sys.getenv('nomis_api_key')){
   intersect <- suppressWarnings(st_intersection(st_transform(boundary, 27700), st_transform(lsoa,27700))) %>%
     dplyr::mutate(overlap_area = as.numeric(st_area(geometry)),
            overlap = round(overlap_area / area, 2)) %>%
@@ -48,14 +51,14 @@ get_employment_within <- function(boundary, year, type = 'employment', split = F
   if(api_key != ''){
     u <- paste0(u, '&uid=',api_key)
   }
-  u_get <- httr::GET(u)
-  if (httr::http_type(u_get) != "text/csv") {
+  res <- httr::GET(u)
+  if (httr::http_type(res) != "text/csv") {
     stop("Something went wrong. NOMIS API did not return csv data.")
-  } else if( httr::http_error(u_get)){
-    stop(glue::glue('Request failed with status: {httr::status_code(u_get)}'))
+  } else if( httr::http_error(res)){
+    stop(glue::glue('Request failed with status: {httr::http_status(res)$reason}'))
   }
   df <- tryCatch({
-    httr::content(u_get) %>%
+    httr::content(res, col_types=cols()) %>%
       janitor::clean_names() %>%
       select(date, geography_code, geography_name, geography_type, industry_code, industry_name, employment_status_name, employment = obs_value, obs_status_name, obs_status)
   },
@@ -70,11 +73,18 @@ get_employment_within <- function(boundary, year, type = 'employment', split = F
     warning('We have hit the 25,000 observation limit for our request. The data returned will not be complete. Please set an API key or use a smaller query.')
   }
 
+  if(industry != 'all'){
+    out <- df %>%
+      dplyr::left_join(intersect, by =c('geography_code'='Code')) %>%
+      dplyr::mutate(employment_within = employment * overlap) %>%
+      tidyr::extract(industry_name, into = c('industry_id','industry_name'), '([A-Z0-9]+)[ :]+([A-Za-z, \\& \\(\\)]+)')
+  } else {
+    out <- df %>%
+      dplyr::left_join(intersect, by =c('geography_code'='Code')) %>%
+      dplyr::mutate(employment_within = employment * overlap)
+  }
 
-  df %>%
-    dplyr::left_join(intersect, by =c('geography_code'='Code')) %>%
-    dplyr::mutate(employment_within = employment * overlap)
-
+  return(out)
 }
 
 

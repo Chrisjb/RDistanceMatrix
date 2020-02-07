@@ -4,8 +4,8 @@
 \alias{get_employment_within}
 \title{Get Employment Within Boundary}
 \usage{
-get_employment_within(boundary, year, type = "employment", split = F,
-  industry = "all", api_key = Sys.getenv("nomis_api_key"))
+get_employment_within(boundary, year = "latest", type = "employment",
+  split = F, industry = "all", api_key = Sys.getenv("nomis_api_key"))
 }
 \arguments{
 \item{boundary}{an sf polygon in England or Wales.}
@@ -28,7 +28,10 @@ Fetches the employment within a given boundary. The boundary is given as an sf f
 The employment data is fetched from NOMIS Business Register and Employment Survey (BRES) data.
 }
 \examples{
-emp <- get_employment_within(shp, 2018, industry = 'all')
-
+iso <- make_isochrone(site = 'SE1 9SG', time = 30, method = 'mapbox', mode = 'driving')
+emp <- get_employment_within(shp, 'latest', industry = 'all')
+# total employment within isochrone:
+emp \%>\%
+ summarise(total_emp = sum(employment_within))
 
 }

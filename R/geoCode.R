@@ -1,4 +1,4 @@
-#' Geocode a location using the google maps geocode API.
+#' geocode a location using the google maps geocode API.
 #'
 #' The function geocodes a single address given as a character string. Be as specific as possible, including the country or postcode to avoid ambiguity.
 #' To avoid loss of accuracy when geocoding a lat/lng string, the geoCode function does not geocode lat/lng strings but instead returns the same string as a dataframe.
@@ -15,7 +15,7 @@
 #' @import stringr
 #'
 #' @examples
-#' geoCode('London Bridge, London, UK', api_key = api_key,  return_all = F)
+#' geocode('London Bridge, London, UK', return_all = F)
 #'
 #' #  lat        lng             type                           address
 #' #  51.50788 -0.0877321 GEOMETRIC_CENTER London Bridge, London SE1 9RA, UK
@@ -24,18 +24,23 @@
 
 
 
-geoCode <- function(address, api_key = Sys.getenv('google_api_key'), verbose=FALSE, return_all = TRUE) {
+geocode <- function(address, api_key = Sys.getenv('google_api_key'), verbose=FALSE, return_all = TRUE) {
   # if address is in lat lng form, do not geocode.
   if(isLatLng(address)){
     return(data.frame(lat=getLat(address),lng=getLng(address),type=NA, address='User Defined Location'))
   } else if(is.na(address)){
       return(data.frame(lat=NA,lng=NA,type=NA, address=NA))
   } else {
-    if(verbose) message(cat(address,"\n"))
+    if(verbose) message(glue::glue("geocoding: {address}\n"))
     u <- url(address,api_key=api_key)
-    doc <- RCurl::getURL(u)
-    x <- jsonlite::fromJSON(doc)
-    if(x$status=="OK") {
+    u_secret <- gsub(api_key,'<API_key_here>', u)
+    if(verbose) message(glue::glue("trying url: {u_secret}\n"))
+    res <- httr::GET(u)
+    x <- httr::content(res, simplifyVector = T)
+    err <- httr::http_error(res)
+    status <- httr::http_status(res)
+
+    if(status$category=="Success") {
       lat <- x$results$geometry$location[1]
       lng <- x$results$geometry$location[2]
       type  <- x$results$geometry$location_type
@@ -47,7 +52,7 @@ geoCode <- function(address, api_key = Sys.getenv('google_api_key'), verbose=FAL
       }
       Sys.sleep(0.1)
     } else {
-      message('API returned status: ', x$status)
+      warning(glue::glue('API request failed with status: {status$category}. Reason given: {status$reason}\n Original url (api key masked): {u_secret} \n Returning empty data.frame...'),call. = F)
       return(data.frame(lat=NA,lng=NA,type=NA, address=NA))
     }
   }

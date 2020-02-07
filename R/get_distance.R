@@ -89,7 +89,6 @@ get_distance <- function(data, origins, destinations,
   } else if(n_destin ==1){
     dmat <- distance_from_origins(origin = origins, dest = destinations, mode = mode, departing = departing, model = model, api_key=google_api_key)
   } else {
-    message('multiple origin-destination not yet implemented')
     dmat_list <- apply(data.frame(origins, destinations),MARGIN = 1,
                   function(x) distance_from_origins(origin = x[['origins']], dest = x[['destinations']], mode = mode, departing = departing, model = model, api_key=google_api_key)
                   )

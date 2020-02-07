@@ -18,12 +18,18 @@
 #' @importFrom httr GET content http_type http_error
 #'
 #' @examples
-#' pop <- get_population_within(shp, 2018, age = 'all')
-#'
+#' iso <- make_isochrone(site = 'SE1 9SG', time = 30, method = 'mapbox', mode = 'driving')
+#' pop <- get_population_within(iso, 'latest', age = 'all')
+#' # total employment within isochrone:
+#' pop %>%
+#'  summarise(total_pop = sum(population_within))
 #'
 #' @export
 #'
-get_population_within <- function(boundary, year, age = 'all', api_key = Sys.getenv('nomis_api_key')){
+get_population_within <- function(boundary, year = 'latest', age = 'all', api_key = Sys.getenv('nomis_api_key')){
+  if(all(sf::st_is_valid(boundary)) == F){
+    boundary <- lwgeom::st_make_valid(boundary)
+  }
   intersect <- suppressWarnings(st_intersection(st_transform(boundary, 27700), st_transform(lsoa,27700))) %>%
     dplyr::mutate(overlap_area = as.numeric(st_area(geometry)),
                   overlap = round(overlap_area / area, 2)) %>%
@@ -40,14 +46,14 @@ get_population_within <- function(boundary, year, age = 'all', api_key = Sys.get
   if(api_key != ''){
     u <- paste0(u, '&uid=',api_key)
   }
-  u_get <- httr::GET(u)
-  if (httr::http_type(u_get) != "text/csv") {
+  res <- httr::GET(u)
+  if (httr::http_type(res) != "text/csv") {
     stop("Something went wrong. NOMIS API did not return csv data.")
-  } else if( httr::http_error(u_get)){
-    stop(glue::glue('Request failed with status: {httr::status_code(u_get)}'))
+  } else if( httr::http_error(res)){
+    stop(glue::glue('Request failed with status: {httr::http_status(res)$reason}'))
   }
   df <- tryCatch({
-    readr::read_csv(u_get$url) %>%
+    httr::content(res, col_types =cols()) %>%
       janitor::clean_names() %>%
       select(date, geography_code, geography_name, geography_type, gender_name, age = c_age_name, age_type = c_age_type, population = obs_value, record_count)
   },
