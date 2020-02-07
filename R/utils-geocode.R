@@ -1,6 +1,6 @@
 #' Utility functions used in geoCode.R
 url <- function(address, return.call = "json", sensor = "false",
-                api_key='AIzaSyB5N4Uij7F5XchUWJ-xvCqLBVfnmWNj9f0') {
+                api_key=Sys.getenv('google_api_key')) {
   root <- "https://maps.google.com/maps/api/geocode/"
   u <- paste(root, return.call, "?address=", address, "&sensor=", sensor,"&key=",api_key, sep = "")
   return(utils::URLencode(u))
