@@ -8,6 +8,7 @@ always_allow_html: yes
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
 ```
 
 ## RDistanceMatrix
@@ -159,8 +160,8 @@ As with `make_isochrone`, we can set the detail level `detail = c('high', 'mediu
 walk_radius <- make_isodistance('EC2R 8AH', distance = 2000, direction = 'out', mode = 'walking',)
 
 ggplot() +
-  base_map(bbox = st_bbox(shp), increase_zoom = 2,basemap = 'google') +
-  geom_sf(data = shp, fill=NA)
+  base_map(bbox = st_bbox(walk_radius), increase_zoom = 2,basemap = 'google') +
+  geom_sf(data = walk_radius, fill=NA)
 ```
 
 ### 3. get_distance
@@ -169,7 +170,7 @@ Uses the google distance matrix API to get the distance or time between a set of
 **Examples:**
 Single origin-destination:
 ```{r}
-od1 <- tibble(
+od1 <- tibble::tibble(
   origin = '51.5131,-0.09182',
   destination = 'EC2R 8AH'
 )
