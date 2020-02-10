@@ -157,8 +157,6 @@ make_isodistance <- function(site, distance, direction = c('out', 'in'),
 
   # create matrix from our grid of points
   pts_mat <- grid  %>%
-    cbind(st_coordinates(.)) %>%
-    dplyr::rename(lng=X,lat=Y) %>%
     dplyr::mutate(latlng = paste0(lng,',',lat))
 
   # create points inside donut hole and set travel time to just less than the max time

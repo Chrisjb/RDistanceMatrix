@@ -11,12 +11,11 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ## RDistanceMatrix
-
 This package contains functions to geocode locations and generate isochrones/isodistance polygons. 
 It also allows for the estimation of population or employment captured within the isochrone.
 
 ### Installation:
-```{r  eval = FALSE}
+```{r install, eval = FALSE}
 devtools::install_github('chrisjb/RDistanceMatrix')
 
 # for the examples below also install
@@ -28,13 +27,13 @@ The isochrone method generates a polygon of the total area to which one can trav
 ### 1.1 mapbox method
 
 To use the mapbox method we need to get ourselves an API key and set it up on R. See section (x.x.x) for how to do this. 
-```{r message = FALSE}
+```{r mapbox1, message = FALSE}
 library(RDistanceMatrix)
 battersea_isochrone <- make_isochrone(site = 'Battersea Power Station', time = 30, method = 'mapbox', mode= 'driving')
 ```
 
 By plotting our isochrone we can see that the *mapbox* method generates a pretty detailed polygon based on drive time from a given origin. 
-```{r}
+```{r mapboxplot1}
 library(ggplot2)
 library(basemapR)
 ggplot() +
@@ -55,9 +54,10 @@ The google method uses the google distance matrix API to calculate the travel ti
 
 To tune the parameter we should use `method=google_guess`. This method uses a very small number of points in a grid to make an initial guess at an isochrone. It returns a `leaflet` map with the grid and isochrone as layers. A correctly tuned `multiplier` parameter should contain the entire isochrone inside of the grid of points, if it doesn't the multiplier should be increased. The isochrone should also reach at least one of the penultimate grid points to ensure we have a detailed enough initial guess.
 
-```{r eval = F}
+```{r google1, eval = F}
 make_isochrone(site = 'battersea power station', time = 30, method = 'google_guess', mode= 'driving', multiplier = 0.4)
 ```
+
 ![correctly tuned multiplier parameter](./documentation_files/png/leaflet_tune_multiplier.png)
 
 
@@ -65,7 +65,7 @@ make_isochrone(site = 'battersea power station', time = 30, method = 'google_gue
 #### 1.2.2 Creating an isochrone with google method
 Once we have a well calibrated `multiplier` parameter, the algorithm will create a more detailed version of the isochrone by chainging the method to `method='google'`. We have the choice of `high`, `medium` or `low` detail. The former will use more of our API quota and cost us more credits (see information on google api credits below). The default is medium detail which should be sufficient for most purposes.
 
-```{r}
+```{r google2}
 battersea_isochrone_google <- make_isochrone(site = 'Battersea Power Station', time = 30, method = 'google', detail = 'med',  mode= 'driving', multiplier = 0.4)
 ```
 
@@ -148,15 +148,64 @@ ggplot() +
 
 
 ### 2. make_isodistance
+Only available with `method=google`. 
 
+Creates a simple features polygon of the area accessible to/from a given location within a certain travel *distance*. Distances available by `driving`, `transit`, `walking` or `cycling`.
 
+As with `make_isochrone`, we can set the detail level `detail = c('high', 'medium', 'low')` to get a more/less accurate isodistance polygon at the expense of more/less google API credits (see below). 
 
+**examples:**
+```{r}
+walk_radius <- make_isodistance('EC2R 8AH', distance = 2000, direction = 'out', mode = 'walking',)
 
+ggplot() +
+  base_map(bbox = st_bbox(shp), increase_zoom = 2,basemap = 'google') +
+  geom_sf(data = shp, fill=NA)
+```
 
 ### 3. get_distance
+Uses the google distance matrix API to get the distance or time between a set of origins and destinations. Input is a data.frame with columns for origin and destination.
+
+**Examples:**
+Single origin-destination:
+```{r}
+od1 <- tibble(
+  origin = '51.5131,-0.09182',
+  destination = 'EC2R 8AH'
+)
 
 
+get_distance(od1, origin, destination, mode = 'transit')
+```
 
+Multiple origin destination:
+```{r}
+pcd_df <- tibble::tribble(
+~ origin,           ~destination,
+ "51.5131,-0.09182", 'EC2R 8AH',
+ "51.5037,-0.01715", 'E14 5AB',
+" 51.5320,-0.12343", 'SE1 9SG',
+ "51.4447,-0.33749", 'SW1A 1AA'
+ )
+
+get_distance(pcd_df, origin, destination)
+```
+
+Example with a dataframe of origins (lat lng) and a single destination;
+
+```{r}
+df <- tibble::tribble(
+ ~ lat, ~lng,
+ 51.5131, -0.09182,
+ 51.5037, -0.01715,
+ 51.5320, -0.12343,
+ 51.4447, -0.33749
+ )
+
+origin_df <- mutate(df, origin = paste0(lat,',',lng))
+
+get_distance(origin_df, origin, 'London Paddington')
+```
 
 ### 4. geoCode
 `geocode` uses the google geocoding API to geocode an address or set of coordinates.
@@ -190,6 +239,7 @@ leaflet() %>%
   addAwesomeMarkers(data = bath[1,], lng = ~lng, lat= ~lat, popup = 'best_guess', 
                     icon = ~awesomeIcons('star',markerColor = 'red'))
 ```
+
 ### 5. get population and employment within a boundary
 #### 5.1 get_population_within
 This function aims to estimate the population within an `sf` polygon. It can be used in conjunction with `make_isochrone` or `make_isodistance` which both return `sf` objects.
@@ -257,12 +307,76 @@ emp_broad %>%
 ```
 
 ### Getting a google API Key
+1. [https://accounts.google.com/SignUp?hl=en&continue=https://myaccount.google.com/intro](Create a Google account)
+2. Head to the [https://console.cloud.google.com/](google cloud console) and log in
+3. Collect free trial credits: At the time of writing google are offering $300 in free credits to use over 12 months. You will have to submit billing info to collect this, but you will need to do this in a later step anyway.
+
+![try google cloud free](./documentation_files/api-setup/try_free.png)
+
+4. Create a project: Select project > New project 
+
+![create a project](./documentation_files/api-setup/new_project.png)
+
+5. Select our new project: Select project > <our project>
+
+![correctly tuned multiplier parameter](./documentation_files/api-setup/select_project.png)
+
+6. Go to the API library (APIs and services > Dashboard > Library)
+
+![API Library](./documentation_files/api-setup/library.png)
+
+7. Search for GeoCoding API and enable
+8. Search for Distance Matrix API and enable
+9. **enable billing:** to use the APIs you must enable billing. In the main nav bar on the left navigate to billing and *link billing account*. If you didn't sign up for the free trial in step 3, you will need to create a billing account here.
+10. **get your API key:** on the left nav navigate to APIs & Services > Credentials > Create Credentials > API KEY
+11. Copy this API key and set it in our RStudio environment using `set_google_api('<your api key>')`
+
+#### If the API key doesn't persist
+Setting the API key in this way should mean that the API key is always accessible by the RDistanceMatrix package in every new R session. If the API key cannot be found after closing and opening a new R session, we can set it manually using:
+
+`usethis::edit_r_environ()`
+
+and paste in the line:
+google_api_key = '<your key here>'
 
 
 #### Google API Credits
+The [documentation](https://developers.google.com/maps/documentation/distance-matrix/usage-and-billing) explains how requests made to the distance matrix API are priced. At the time of writing you get $200 worth of free API usage each month. This equates to 40,000 **elements** each month using the standard API request, or 20,000 **elements** using the advanced API request (the advanced API is used if we set a departure time for time in traffic).
+
+To avoid going over the monthly limit, pay attention to the messages that are output from the `make_isochrone` and `make_isodistance` functions. The functions will tell you how many API credits we used after each request, and will warn us before making requests worth over $10 in credit. Never reveal your API key to anyone.
+
+**What is an element?** An element is one origin-destination request. A typical isochrone will use anywhere between 100 and 1000 origin-destination queries to determine the extents of the isochrone polygon. 
+
+If you're unsure how much usage you have left for the month, visit the [APIs and services dashboard](https://console.cloud.google.com/apis/dashboard) for your project, click on our API (Distance Matrix API) and you can view how many elements used each day over the past month.
 
 
 ### Getting a mapbox API Key
+1. [sign up for mapbox](https://www.mapbox.com/)
+2. [Head to your account page](https://account.mapbox.com/)
+3. Scroll down to see an option to create an api key 
+4. Copy this API key and set it in our RStudio environment using `set_mapbox_api('<your api key>')`
 
+No billing details are required at the time of writing so no need to worry about going over quotas. The free quota is very generous and allows 100,000 isochrones to be made free of charge.
+
+#### If the API key doesn't persist
+Setting the API key in this way should mean that the API key is always accessible by the RDistanceMatrix package in every new R session. If the API key cannot be found after closing and opening a new R session, we can set it manually using:
+
+`usethis::edit_r_environ()`
+
+and paste in the line:
+mapbox_api_key = '<your key here>'
 
 ### Getting a Nomis API Key
+1. [Sign up for a NOMIS account](https://www.nomisweb.co.uk/myaccount/userjoin.asp)
+2. Once signed in, click on your name to reveal the account menu and click on 'account summary'
+3. Scroll down and click 'NOMIS API' in the menu to the left
+4. Your 'unique id' should be displayed here. This is your API key.
+5. Copy this API key and set it in our RStudio environment using `set_nomis_api('<your api key>')`
+
+#### If the API key doesn't persist
+Setting the API key in this way should mean that the API key is always accessible by the RDistanceMatrix package in every new R session. If the API key cannot be found after closing and opening a new R session, we can set it manually using:
+
+`usethis::edit_r_environ()`
+
+and paste in the line:
+nomis_api_key = '<your key here>'

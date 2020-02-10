@@ -10,6 +10,7 @@
 #' @return a data.frame containing the coordinates, location type and approximate address.
 #'
 #' @importFrom jsonlite fromJSON
+#' @importFrom dplyr pull mutate
 #' @importFrom glue glue
 #' @importFrom RCurl getURL
 #' @import stringr
@@ -66,10 +67,11 @@ get_distance <- function(data, origins, destinations,
   model <- match.arg(model)
 
   # check if tidy eval needed
-  origins <- tryCatch(data %>% pull({{origins}}), error = function(e) {
+  origins <- tryCatch(data %>% dplyr::pull({{origins}}), error = function(e) {
                         as.character(origins)
                         })
-  destinations <- tryCatch(data %>% pull({{destinations}}), error = function(e) {
+
+  destinations <- tryCatch(data %>% dplyr::pull({{destinations}}), error = function(e) {
     as.character(destinations)
   })
 
@@ -106,7 +108,7 @@ get_distance <- function(data, origins, destinations,
   }
 
   data %>%
-    mutate(!!ensym(dist_col) := as.numeric(dmat$dist),
-                  !!ensym(time_col) := as.numeric(dmat$time)/60)
+    dplyr::mutate(!!rlang::ensym(dist_col) := as.numeric(dmat$dist),
+                  !!rlang::ensym(time_col) := as.numeric(dmat$time)/60)
 }
 

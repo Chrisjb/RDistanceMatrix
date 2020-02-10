@@ -5,7 +5,7 @@
 \title{Utility functions used in geoCode.R}
 \usage{
 url(address, return.call = "json", sensor = "false",
-  api_key = "AIzaSyB5N4Uij7F5XchUWJ-xvCqLBVfnmWNj9f0")
+  api_key = Sys.getenv("google_api_key"))
 }
 \description{
 Utility functions used in geoCode.R
