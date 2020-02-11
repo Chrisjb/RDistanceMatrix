@@ -2,7 +2,7 @@
 #'
 #' Helper function to set the mapbox API key as an environment variable
 #'
-#' @param key
+#' @param key a mapbox API key
 #'
 #' @examples
 #' set_mapbox_api('<api key here>')
