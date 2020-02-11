@@ -10,9 +10,9 @@
 #' @return a data.frame containing the coordinates, location type and approximate address.
 #'
 #' @importFrom jsonlite fromJSON
-#' @importFrom dplyr pull mutate
+#' @importFrom dplyr pull mutate bind_rows
 #' @importFrom glue glue
-#' @importFrom RCurl getURL
+#' @importFrom rlang ensym UQ
 #' @import stringr
 #'
 #' @examples
@@ -25,7 +25,7 @@
 #' 51.5320, -0.12343,
 #' 51.4447, -0.33749
 #' )
-#' origin_df <- mutate(df, origin = paste0(lat,',',lng))
+#' origin_df <- dplyr::mutate(df, origin = paste0(lat,',',lng))
 #'
 #' get_distance(origin_df, origin, 'London Paddington')
 #'
@@ -108,7 +108,7 @@ get_distance <- function(data, origins, destinations,
   }
 
   data %>%
-    dplyr::mutate(!!rlang::ensym(dist_col) := as.numeric(dmat$dist),
-                  !!rlang::ensym(time_col) := as.numeric(dmat$time)/60)
+    dplyr::mutate(rlang::UQ(rlang::ensym(dist_col)) := as.numeric(dmat$dist),
+                  rlang::UQ(rlang::ensym(time_col)) := as.numeric(dmat$time)/60)
 }
 
