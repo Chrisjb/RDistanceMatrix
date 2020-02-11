@@ -13,8 +13,6 @@ geocode_mapbox(address, api_key = Sys.getenv("mapbox_api_key"),
 \item{api_key}{character string containing api key for the google maps geocode api. You can generate one for free in your google cloud console.}
 
 \item{return_all}{logical value. Some locations may return more than one geocoded result. If you only want one row returned set return_all = FALSE.}
-
-\item{verbose}{logical value. If TRUE, echos the input address}
 }
 \value{
 a data.frame containing the coordinates, location type and approximate address.
