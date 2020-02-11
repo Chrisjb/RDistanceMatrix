@@ -2,7 +2,7 @@
 #'
 #' Helper function to set the NOMIS API key as an environment variable
 #'
-#' @param key
+#' @param key the NOMIS API Key (unique ID)
 #'
 #' @examples
 #' set_nomis_api('<api key here>')
