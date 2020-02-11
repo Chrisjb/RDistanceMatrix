@@ -1,4 +1,3 @@
-#' utility functions used in make_distance_isochrone.R and make_time_isochrone.R
 approx_grid <- function(lat,lng,km) {
   dist_lat <- km/6378 * (180/pi)
   dist_lng <- km/6387 *(180/pi) / cos(lat * pi/180)

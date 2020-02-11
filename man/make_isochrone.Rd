@@ -38,8 +38,10 @@ an sf polygon
 Generates a time isochrone for travel times to/from a specified location.
 }
 \examples{
-transit_isochrone <- make_isochrone(site = 'London Bridge Station, London, UK', time = 30,  direction ='out',  multiplier = 0.7, mode = 'transit')
-driving_isochrone_mapbox <- make_isochrone(site = 'London Bridge Station, London, UK', time = 30, method = 'mapbox', mode = 'driving')
+transit_isochrone <- make_isochrone(site = 'London Bridge Station, London, UK', time = 30,
+  direction ='out',  multiplier = 0.7, mode = 'transit')
+driving_isochrone_mapbox <- make_isochrone(site = 'London Bridge Station, London, UK',
+ time = 30, method = 'mapbox', mode = 'driving')
 
 library(leaflet)
 leaflet(driving_isochrone_mapbox) \%>\%

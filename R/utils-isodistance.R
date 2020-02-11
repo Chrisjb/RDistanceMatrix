@@ -1,4 +1,3 @@
-#' utility functions used in make_distance_isochrone.R and make_time_isochrone.R
 validate_distance_args <- function(google_api_key, direction, site, distance, detail, mode, departing) {
   # ensure API Key is correct
     if(Sys.getenv('google_api_key') == ''){
