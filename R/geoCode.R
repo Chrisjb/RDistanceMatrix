@@ -11,7 +11,8 @@
 #' @return a data.frame containing the coordinates, location type and approximate address.
 #'
 #' @importFrom jsonlite fromJSON
-#' @importFrom RCurl getURL
+#' @importFrom httr GET content http_status http_error
+#' @importFrom glue glue
 #' @import stringr
 #'
 #' @examples
