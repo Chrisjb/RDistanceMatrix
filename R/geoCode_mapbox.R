@@ -10,10 +10,11 @@
 #'
 #' @return a data.frame containing the coordinates, location type and approximate address.
 #'
-#' @importFrom jsonlite fromJSON
+#' @importFrom dplyr mutate rename
+#' @importFrom rlang .data
 #' @importFrom glue glue
-#' @importFrom RCurl getURL
-#' @import stringr
+#' @importFrom utils URLencode
+#' @importFrom sf st_coordinates read_sf st_drop_geometry
 #'
 #' @examples
 #' geocode_mapbox('London Bridge, London, UK', return_all = FALSE)
@@ -34,11 +35,11 @@ geocode_mapbox <- function(address, api_key=Sys.getenv('mapbox_api_key'),return_
   } else {
     u <- glue::glue('https://api.mapbox.com/geocoding/v5/mapbox.places/{address}.json?access_token={api_key}')
     u_secret <- gsub(api_key,'SECRET',u)
-    message(glue('geocoding url: {URLencode(u_secret)}'))
-    place <- read_sf(URLencode(u)) %>%
-      cbind(st_coordinates(.)) %>%
-      rename(lng = X, lat = Y) %>%
-      st_drop_geometry()
+    message(glue::glue('geocoding url: {utils::URLencode(u_secret)}'))
+    place <- sf::read_sf(utils::URLencode(u)) %>%
+      cbind(sf::st_coordinates(.$geometry)) %>%
+      dplyr::rename(lng = .data$X, lat = .data$Y) %>%
+      sf::st_drop_geometry()
 
     lat <- place$lat
     lng <- place$lng
