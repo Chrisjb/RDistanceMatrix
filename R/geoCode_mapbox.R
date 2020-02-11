@@ -5,7 +5,6 @@
 #'
 #' @param address character string with address to be geocoded. Be as specific as possible to avoid ambiguity.
 #' @param api_key character string containing api key for the google maps geocode api. You can generate one for free in your google cloud console.
-#' @param verbose logical value. If TRUE, echos the input address
 #' @param return_all logical value. Some locations may return more than one geocoded result. If you only want one row returned set return_all = FALSE.
 #'
 #' @return a data.frame containing the coordinates, location type and approximate address.

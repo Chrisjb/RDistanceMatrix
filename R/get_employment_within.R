@@ -31,11 +31,11 @@
 
 get_employment_within <- function(boundary, year = 'latest', type = 'employment', split = FALSE, industry = 'all', api_key = Sys.getenv('nomis_api_key')){
   intersect <- suppressWarnings(sf::st_intersection(sf::st_transform(boundary, 27700), sf::st_transform(lsoa,27700))) %>%
-    dplyr::mutate(overlap_area = as.numeric(sf::st_area(geometry)),
-           overlap = round(overlap_area / area, 2)) %>%
-    dplyr::filter(overlap >0) %>%
+    dplyr::mutate(overlap_area = as.numeric(sf::st_area(.$geometry)),
+           overlap = round(.data$overlap_area / .data$area, 2)) %>%
+    dplyr::filter(.data$overlap >0) %>%
     sf::st_drop_geometry() %>%
-    dplyr::select(Code,overlap)
+    dplyr::select(.data$Code,.data$overlap)
 
   codes <- intersect$Code
   nomis_id <- dplyr::if_else(year >= 2015,  'NM_189_1', '****')
@@ -61,7 +61,11 @@ get_employment_within <- function(boundary, year = 'latest', type = 'employment'
   df <- tryCatch({
     httr::content(res, col_types= readr::cols()) %>%
       janitor::clean_names() %>%
-      dplyr::select(date, geography_code, geography_name, geography_type, industry_code, industry_name, employment_status_name, employment = obs_value, obs_status_name, obs_status)
+      dplyr::select(.data$date, .data$geography_code,
+                    .data$geography_name, .data$geography_type,
+                    .data$industry_code, .data$industry_name,
+                    .data$employment_status_name, employment = .data$obs_value,
+                    .data$obs_status_name, .data$obs_status)
   },
   error = function(e){
     stop(glue::glue('error: {e}'))
@@ -77,12 +81,12 @@ get_employment_within <- function(boundary, year = 'latest', type = 'employment'
   if(industry != 'all'){
     out <- df %>%
       dplyr::left_join(intersect, by =c('geography_code'='Code')) %>%
-      dplyr::mutate(employment_within = employment * overlap) %>%
-      tidyr::extract(industry_name, into = c('industry_id','industry_name'), '([A-Z0-9]+)[ :]+([A-Za-z, \\& \\(\\)]+)')
+      dplyr::mutate(employment_within = .data$employment * .data$overlap) %>%
+      tidyr::extract(.data$industry_name, into = c('industry_id','industry_name'), '([A-Z0-9]+)[ :]+([A-Za-z, \\& \\(\\)]+)')
   } else {
     out <- df %>%
       dplyr::left_join(intersect, by =c('geography_code'='Code')) %>%
-      dplyr::mutate(employment_within = employment * overlap)
+      dplyr::mutate(employment_within = .data$employment * .data$overlap)
   }
 
   return(out)

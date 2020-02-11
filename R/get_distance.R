@@ -1,11 +1,13 @@
 #' Get network distance
 #'
 #' Fetch the distance between sets of origins and destinations using Google Distance Matrix API
-#'
-#' @param address character string with address to be geocoded. Be as specific as possible to avoid ambiguity.
-#' @param api_key character string containing api key for the google maps geocode api. You can generate one for free in your google cloud console.
-#' @param verbose logical value. If TRUE, echos the input address
-#' @param return_all logical value. Some locations may return more than one geocoded result. If you only want one row returned set return_all = F.
+#' @param data a data.frame or tibble containing our origins, destinations or both.
+#' @param origins a column in our data.frame containing the origin addresses - can be of form 'lat,lng' or address with postcode. Else a string or vector can be passed.
+#' @param destinations a column in our data.frame containing the destination addresses - can be of form 'lat,lng' or address with postcode. Else a string or vector can be passed.
+#' @param mode driving, cycling, transit or walking.
+#' @param departing departure time can be set in format 'YYYY-MM-DD HH:MM:SS'
+#' @param model 'best_guess' is the default model. Google also provides 'optimistic' and 'pessimistic' models. See google distance matrix API documentation.
+#' @param google_api_key google cloud console API key. Ensure this is enabled on the distance matrix API and geocoding API.
 #'
 #' @return a data.frame containing the coordinates, location type and approximate address.
 #'

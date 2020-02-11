@@ -1,1 +1,1 @@
-utils::globalVariables(c("lsoa"))
+utils::globalVariables(c("lsoa",":="))
