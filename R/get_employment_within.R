@@ -14,14 +14,15 @@
 #' @return a tibble containing employment data
 #'
 #' @importFrom glue glue
-#' @importFrom sf st_intersection st_transform
+#' @importFrom sf st_intersection st_transform st_drop_geometry st_area
 #' @importFrom dplyr mutate select rename if_else case_when filter left_join
+#' @importFrom readr cols
 #' @importFrom janitor clean_names
 #' @importFrom httr GET content http_type http_error
 #'
 #' @examples
 #' iso <- make_isochrone(site = 'SE1 9SG', time = 30, method = 'mapbox', mode = 'driving')
-#' emp <- get_employment_within(shp, 'latest', industry = 'all')
+#' emp <- get_employment_within(iso, 'latest', industry = 'all')
 #' # total employment within isochrone:
 #' emp %>%
 #'  summarise(total_emp = sum(employment_within))
@@ -29,8 +30,8 @@
 #' @export
 
 get_employment_within <- function(boundary, year = 'latest', type = 'employment', split = FALSE, industry = 'all', api_key = Sys.getenv('nomis_api_key')){
-  intersect <- suppressWarnings(st_intersection(st_transform(boundary, 27700), st_transform(lsoa,27700))) %>%
-    dplyr::mutate(overlap_area = as.numeric(st_area(geometry)),
+  intersect <- suppressWarnings(sf::st_intersection(sf::st_transform(boundary, 27700), sf::st_transform(lsoa,27700))) %>%
+    dplyr::mutate(overlap_area = as.numeric(sf::st_area(geometry)),
            overlap = round(overlap_area / area, 2)) %>%
     dplyr::filter(overlap >0) %>%
     sf::st_drop_geometry() %>%
@@ -58,15 +59,15 @@ get_employment_within <- function(boundary, year = 'latest', type = 'employment'
     stop(glue::glue('Request failed with status: {httr::http_status(res)$reason}'))
   }
   df <- tryCatch({
-    httr::content(res, col_types=cols()) %>%
+    httr::content(res, col_types= readr::cols()) %>%
       janitor::clean_names() %>%
       select(date, geography_code, geography_name, geography_type, industry_code, industry_name, employment_status_name, employment = obs_value, obs_status_name, obs_status)
   },
   error = function(e){
-    glue::glue('error: {e}')
+    stop(glue::glue('error: {e}'))
   },
   warning = function(w){
-    glue::glue('warning: {w}')
+    warning(glue::glue('warning: {w}'))
   })
 
   if(nrow(df) == 25000){
