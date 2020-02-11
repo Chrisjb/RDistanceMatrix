@@ -5,11 +5,13 @@
 #' @param key the NOMIS API Key (unique ID)
 #'
 #' @examples
+#' \dontrun{
 #' set_nomis_api('<api key here>')
 #' # Check our assignment worked
 #' Sys.getenv('nomis_api_key')
 #'
 #' #[1] "<api key here>"
+#' }
 #'
 #' @export
 

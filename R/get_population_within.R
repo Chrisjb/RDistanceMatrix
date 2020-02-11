@@ -18,12 +18,13 @@
 #' @importFrom httr GET content http_type http_error
 #'
 #' @examples
+#' \dontrun{
 #' iso <- make_isochrone(site = 'SE1 9SG', time = 30, method = 'mapbox', mode = 'driving')
 #' pop <- get_population_within(iso, 'latest', age = 'all')
 #' # total employment within isochrone:
 #' pop %>%
 #'  dplyr::summarise(total_pop = sum(population_within))
-#'
+#' }
 #' @export
 #'
 get_population_within <- function(boundary, year = 'latest', age = 'all', api_key = Sys.getenv('nomis_api_key')){

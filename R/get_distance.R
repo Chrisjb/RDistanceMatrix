@@ -18,7 +18,7 @@
 #' @import stringr
 #'
 #' @examples
-#'
+#' \dontrun{
 #' ## Example with a dataframe of origins (lat lng) and a single destination
 #' df <- tibble::tribble(
 #' ~ lat, ~lng,
@@ -57,7 +57,7 @@
 #' # 2 "51.5037,-0.01715"  E14 5AB                  867         3.33
 #' # 3 " 51.5320,-0.12343" SE1 9SG                 5747        24.0
 #' # 4 "51.4447,-0.33749"  SW1A 1AA               16895        40.2
-#'
+#' }
 #' @export
 
 get_distance <- function(data, origins, destinations,

@@ -5,12 +5,13 @@
 #' @param key a mapbox API key
 #'
 #' @examples
+#' \dontrun{
 #' set_mapbox_api('<api key here>')
 #' # Check our assignment worked
 #' Sys.getenv('mapbox_api_key')
 #'
 #' #[1] "<api key here>"
-#'
+#' }
 #' @export
 
 set_mapbox_api <- function(key){

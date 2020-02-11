@@ -16,11 +16,12 @@
 #' @import stringr
 #'
 #' @examples
+#' \dontrun{
 #' geocode('London Bridge, London, UK', return_all = FALSE)
 #'
 #' #  lat        lng             type                           address
 #' #  51.50788 -0.0877321 GEOMETRIC_CENTER London Bridge, London SE1 9RA, UK
-#'
+#' }
 #' @export
 
 

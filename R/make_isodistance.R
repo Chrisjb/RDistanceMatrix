@@ -20,8 +20,9 @@
 #' @importFrom httr GET content http_error http_status
 #'
 #' @examples
+#' \dontrun{
 #' walk_radius <- make_isodistance('EC2R 8AH', distance = 2000, direction = 'out', mode = 'walking')
-#'
+#' }
 #'
 #' @export
 

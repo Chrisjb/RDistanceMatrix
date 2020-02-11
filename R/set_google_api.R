@@ -6,12 +6,13 @@
 #'
 #'
 #' @examples
+#' \dontrun{
 #' set_google_api('<api key here>')
 #' # Check our assignment worked
 #' Sys.getenv('google_api_key')
 #'
 #' #[1] "<api key here>"
-#'
+#' }
 #' @export
 
 set_google_api <- function(key){
