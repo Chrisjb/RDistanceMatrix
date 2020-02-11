@@ -79,7 +79,7 @@ Once we have a well calibrated `multiplier` parameter, the algorithm will create
 battersea_isochrone_google <- make_isochrone(site = 'Battersea Power Station', time = 30, method = 'google', detail = 'med',  mode= 'driving', multiplier = 0.4)
 ```
 
-If we compare the results of our mapbox isochrone (red) with the google isochrone (blue), we see that the results are broadly similar but the goolgle one is more generalised. The mapbox version does a better job at sticking to the road network and following the roads out as long as to their 30 minute extents. For this reason, we should prefer the mapbox version for tasks that can be accomplished with the mapbox API.
+If we compare the results of our mapbox isochrone (red) with the google isochrone (blue), we see that the results are broadly similar but the google one is more generalised. The mapbox version does a better job at sticking to the road network and following the roads out as long as to their 30 minute extents. For this reason, we should prefer the mapbox version for tasks that can be accomplished with the mapbox API.
 
 ```{r}
 library(ggplot2)
