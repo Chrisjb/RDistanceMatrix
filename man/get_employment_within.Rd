@@ -30,9 +30,9 @@ The employment data is fetched from NOMIS Business Register and Employment Surve
 }
 \examples{
 iso <- make_isochrone(site = 'SE1 9SG', time = 30, method = 'mapbox', mode = 'driving')
-emp <- get_employment_within(shp, 'latest', industry = 'all')
+emp <- get_employment_within(iso, 'latest', industry = 'all')
 # total employment within isochrone:
 emp \%>\%
- summarise(total_emp = sum(employment_within))
+ dplyr::summarise(total_emp = sum(employment_within))
 
 }

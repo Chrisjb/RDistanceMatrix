@@ -7,7 +7,7 @@
 set_nomis_api(key)
 }
 \arguments{
-\item{key}{}
+\item{key}{the NOMIS API Key (unique ID)}
 }
 \description{
 Helper function to set the NOMIS API key as an environment variable

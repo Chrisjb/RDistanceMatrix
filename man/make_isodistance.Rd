@@ -20,6 +20,8 @@ make_isodistance(site, distance, direction = c("out", "in"),
 
 \item{mode}{a character string for the mode of travel. Possible values are 'driving', 'cycling', 'transit', or 'walking'}
 
+\item{departing}{optional parameter for getting distance in traffic. Google maps may route differently to avoid heavy traffic, changing the distance at peak times. If set, takes the format "YYYY-MM-DD HH:MM:SS"}
+
 \item{google_api_key}{the google maps API key. This can be generated from the google cloud console and set with set_google_api}
 }
 \value{

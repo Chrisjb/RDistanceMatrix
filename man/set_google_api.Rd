@@ -7,7 +7,7 @@
 set_google_api(key)
 }
 \arguments{
-\item{key}{}
+\item{key}{the api key for google cloud console. It must be enabled for the google distance matrix API and geocoding API.}
 }
 \description{
 Helper function to set the google API key as an environment variable

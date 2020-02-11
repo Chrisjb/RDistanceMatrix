@@ -7,7 +7,7 @@
 set_mapbox_api(key)
 }
 \arguments{
-\item{key}{}
+\item{key}{a mapbox API key}
 }
 \description{
 Helper function to set the mapbox API key as an environment variable

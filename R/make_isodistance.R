@@ -7,6 +7,7 @@
 #' @param direction either 'in' or 'out'. In generates an isochrone from multiple origins to the site. Out goes from the site to multiple destinations.
 #' @param detail 'low', 'medium' or 'high' level of detail in the isochrone. High will produce the most granular detail but will use more API credits.
 #' @param mode a character string for the mode of travel. Possible values are 'driving', 'cycling', 'transit', or 'walking'
+#' @param departing optional parameter for getting distance in traffic. Google maps may route differently to avoid heavy traffic, changing the distance at peak times. If set, takes the format "YYYY-MM-DD HH:MM:SS"
 #' @param google_api_key the google maps API key. This can be generated from the google cloud console and set with set_google_api
 #'
 #'

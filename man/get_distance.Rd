@@ -34,7 +34,7 @@ df <- tibble::tribble(
 51.5320, -0.12343,
 51.4447, -0.33749
 )
-origin_df <- mutate(df, origin = paste0(lat,',',lng))
+origin_df <- dplyr::mutate(df, origin = paste0(lat,',',lng))
 
 get_distance(origin_df, origin, 'London Paddington')
 
