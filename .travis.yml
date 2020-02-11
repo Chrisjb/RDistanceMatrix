@@ -1,0 +1,22 @@
+# R for travis: see documentation at https://docs.travis-ci.com/user/languages/r
+
+language: r
+r:
+  - release
+  - devel
+
+sudo: true
+cache: packages
+
+before_install:
+  - sudo apt-get update
+  - sudo apt-get install -y libpq-dev \
+    libcurl4-openssl-dev \
+    libgdal-dev \
+    libgeos-dev \
+    libproj-dev \
+    libudunits2-dev
+
+
+after_success:
+  - Rscript -e 'covr::codecov(quiet=FALSE)'
