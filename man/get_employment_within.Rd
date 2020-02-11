@@ -5,7 +5,8 @@
 \title{Get Employment Within Boundary}
 \usage{
 get_employment_within(boundary, year = "latest", type = "employment",
-  split = F, industry = "all", api_key = Sys.getenv("nomis_api_key"))
+  split = FALSE, industry = "all",
+  api_key = Sys.getenv("nomis_api_key"))
 }
 \arguments{
 \item{boundary}{an sf polygon in England or Wales.}

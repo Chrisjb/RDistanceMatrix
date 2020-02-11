@@ -12,7 +12,7 @@ geocode_mapbox(address, api_key = Sys.getenv("mapbox_api_key"),
 
 \item{api_key}{character string containing api key for the google maps geocode api. You can generate one for free in your google cloud console.}
 
-\item{return_all}{logical value. Some locations may return more than one geocoded result. If you only want one row returned set return_all = F.}
+\item{return_all}{logical value. Some locations may return more than one geocoded result. If you only want one row returned set return_all = FALSE.}
 
 \item{verbose}{logical value. If TRUE, echos the input address}
 }
@@ -24,7 +24,7 @@ The function geocodes a single address given as a character string. Be as specif
 To avoid loss of accuracy when geocoding a lat/lng string, the geoCode function does not geocode lat/lng strings but instead returns the same string as a dataframe.
 }
 \examples{
-geocode_mapbox('London Bridge, London, UK', return_all = F)
+geocode_mapbox('London Bridge, London, UK', return_all = FALSE)
 
 #  lat        lng             type                           address
 #  51.50788 -0.0877321 GEOMETRIC_CENTER London Bridge, London SE1 9RA, UK

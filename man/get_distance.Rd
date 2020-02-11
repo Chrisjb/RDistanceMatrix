@@ -5,7 +5,7 @@
 \title{Get network distance}
 \usage{
 get_distance(data, origins, destinations, mode = c("driving", "walking",
-  "cycling", "transit"), departing = F, model = c("best_guess",
+  "cycling", "transit"), departing = FALSE, model = c("best_guess",
   "pessimistic", "optimistic"),
   google_api_key = Sys.getenv("google_api_key"))
 }
