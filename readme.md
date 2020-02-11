@@ -35,7 +35,7 @@ as either an address string to be geocoded, or a `data.frame` with a
 ### 1.1 mapbox method
 
 To use the mapbox method we need to get ourselves an API key and set it
-up on R. See section (x.x.x) for how to do this.
+up on R. See section (6.2) for how to do this.
 
 ``` r
 library(RDistanceMatrix)
@@ -398,7 +398,7 @@ get_distance(od1, origin, destination, mode = 'transit')
     ## # A tibble: 1 x 4
     ##   origin           destination transit_distance transit_time
     ##   <chr>            <chr>                  <dbl>        <dbl>
-    ## 1 51.5131,-0.09182 EC2R 8AH                 553         4.73
+    ## 1 51.5131,-0.09182 EC2R 8AH                 553         4.28
 
 Multiple origin destination:
 
@@ -685,7 +685,7 @@ emp_broad %>%
     ## 17 8           Transport & storage (inc postal) (H)                   876. 
     ## 18 9           Accommodation & food services (I)                     1889.
 
-### Getting a google API Key
+### 6.1 Getting a google API Key
 
 1.  [https://accounts.google.com/SignUp?hl=en\&continue=https://myaccount.google.com/intro](Create%20a%20Google%20account)
 2.  Head to the
@@ -760,7 +760,7 @@ dashboard](https://console.cloud.google.com/apis/dashboard) for your
 project, click on our API (Distance Matrix API) and you can view how
 many elements used each day over the past month.
 
-### Getting a mapbox API Key
+### 6.2 Getting a mapbox API Key
 
 1.  [sign up for mapbox](https://www.mapbox.com/)
 2.  [Head to your account page](https://account.mapbox.com/)
@@ -783,7 +783,7 @@ can set it manually using:
 
 and paste in the line: mapbox\_api\_key = ‘<your key here>’
 
-### Getting a Nomis API Key
+### 6.3 Getting a Nomis API Key
 
 1.  [Sign up for a NOMIS
     account](https://www.nomisweb.co.uk/myaccount/userjoin.asp)
