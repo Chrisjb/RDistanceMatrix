@@ -24,7 +24,6 @@
 #' @importFrom httr GET content http_error http_status
 #'
 #' @examples
-#' \dontrun{
 #' transit_isochrone <- make_isochrone(site = 'London Bridge Station, London, UK', time = 30,
 #'   direction ='out',  multiplier = 0.7, mode = 'transit')
 #' driving_isochrone_mapbox <- make_isochrone(site = 'London Bridge Station, London, UK',
@@ -34,7 +33,7 @@
 #' leaflet(driving_isochrone_mapbox) %>%
 #'   addTiles() %>%
 #'   addPolygons()
-#'   }
+#'
 #' @export
 make_isochrone <- function(site, time, direction = c('out','in'),
                            detail = 'medium', multiplier = 0.8,

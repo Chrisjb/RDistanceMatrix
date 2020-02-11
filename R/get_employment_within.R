@@ -21,13 +21,12 @@
 #' @importFrom httr GET content http_type http_error
 #'
 #' @examples
-#' \dontrun{
 #' iso <- make_isochrone(site = 'SE1 9SG', time = 30, method = 'mapbox', mode = 'driving')
 #' emp <- get_employment_within(iso, 'latest', industry = 'all')
 #' # total employment within isochrone:
 #' emp %>%
 #'  dplyr::summarise(total_emp = sum(employment_within))
-#'  }
+#'
 #'
 #' @export
 
