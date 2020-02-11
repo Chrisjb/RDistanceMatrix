@@ -145,7 +145,7 @@ make_isodistance <- function(site, distance, direction = c('out', 'in'),
   grid <-  expand.grid(lat = lats, lng = lngs)
 
   grid <- grid %>%
-    st_as_sf(coords = c('lng','lat'),crs= 4326, remove = F)
+    st_as_sf(coords = c('lng','lat'),crs= 4326, remove = FALSE)
 
 
   # intersect grid with possible area range
@@ -173,7 +173,7 @@ make_isodistance <- function(site, distance, direction = c('out', 'in'),
     dplyr::mutate(latlng = paste0(lat,',',lng))
 
   elements <- length(df_init$latlng)+length(df$latlng)
-  credits <- dplyr::if_else(departing == F, elements*0.005, elements*0.01)
+  credits <- dplyr::if_else(departing == FALSE, elements*0.005, elements*0.01)
 
   if(credits >= 10) {
     warning("Large Query Warning: request will use {elements} elements (£{credits} credits).")
@@ -227,7 +227,7 @@ make_isodistance <- function(site, distance, direction = c('out', 'in'),
     sf::st_sf()
 
   message(glue::glue('Google API elements used: {elements} (£{credits} credits). Isochrone generated to accuracy of {round(tolerence)}m'))
-  if(all(sf::st_is_valid(shp))==F){
+  if(all(sf::st_is_valid(shp))==FALSE){
     shp <- lwgeom::st_make_valid(shp)
   }
   return(shp)

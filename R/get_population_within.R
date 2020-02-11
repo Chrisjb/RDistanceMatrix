@@ -27,7 +27,7 @@
 #' @export
 #'
 get_population_within <- function(boundary, year = 'latest', age = 'all', api_key = Sys.getenv('nomis_api_key')){
-  if(all(sf::st_is_valid(boundary)) == F){
+  if(all(sf::st_is_valid(boundary)) == FALSE){
     boundary <- lwgeom::st_make_valid(boundary)
   }
   intersect <- suppressWarnings(st_intersection(st_transform(boundary, 27700), st_transform(lsoa,27700))) %>%

@@ -6,7 +6,7 @@
 #' @param address character string with address to be geocoded. Be as specific as possible to avoid ambiguity.
 #' @param api_key character string containing api key for the google maps geocode api. You can generate one for free in your google cloud console.
 #' @param verbose logical value. If TRUE, echos the input address
-#' @param return_all logical value. Some locations may return more than one geocoded result. If you only want one row returned set return_all = F.
+#' @param return_all logical value. Some locations may return more than one geocoded result. If you only want one row returned set return_all = FALSE.
 #'
 #' @return a data.frame containing the coordinates, location type and approximate address.
 #'
@@ -16,7 +16,7 @@
 #' @import stringr
 #'
 #' @examples
-#' geocode_mapbox('London Bridge, London, UK', return_all = F)
+#' geocode_mapbox('London Bridge, London, UK', return_all = FALSE)
 #'
 #' #  lat        lng             type                           address
 #' #  51.50788 -0.0877321 GEOMETRIC_CENTER London Bridge, London SE1 9RA, UK
@@ -44,7 +44,7 @@ geocode_mapbox <- function(address, api_key=Sys.getenv('mapbox_api_key'),return_
     lng <- place$lng
     type  <- place$id
 
-      if(return_all == T){
+      if(return_all == TRUE){
         return(data.frame(lat, lng, type))
       } else {
         return(data.frame(lat, lng, type)[1,])

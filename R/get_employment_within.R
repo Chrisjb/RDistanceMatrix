@@ -28,7 +28,7 @@
 #'
 #' @export
 
-get_employment_within <- function(boundary, year = 'latest', type = 'employment', split = F, industry = 'all', api_key = Sys.getenv('nomis_api_key')){
+get_employment_within <- function(boundary, year = 'latest', type = 'employment', split = FALSE, industry = 'all', api_key = Sys.getenv('nomis_api_key')){
   intersect <- suppressWarnings(st_intersection(st_transform(boundary, 27700), st_transform(lsoa,27700))) %>%
     dplyr::mutate(overlap_area = as.numeric(st_area(geometry)),
            overlap = round(overlap_area / area, 2)) %>%
@@ -44,8 +44,8 @@ get_employment_within <- function(boundary, year = 'latest', type = 'employment'
                          industry == '2digit' ~ '146800641...146800643,146800645...146800673,146800675...146800679,146800681...146800683,146800685...146800687,146800689...146800693,146800695,146800696,146800698...146800706,146800708...146800715,146800717...146800722,146800724...146800728,146800730...146800739')
 
   emp_type <- dplyr::case_when(type == 'employment' ~'4',
-                               type == 'employees' & split == F ~ '1',
-                               type == 'employees' & split == T ~ '2,3')
+                               type == 'employees' & split == FALSE ~ '1',
+                               type == 'employees' & split == TRUE ~ '2,3')
 
   u <- glue::glue("https://www.nomisweb.co.uk/api/v01/dataset/{nomis_id}.data.csv?geography={paste0(codes,collapse=',')}&date={year}&industry={industry_group}&employment_status={emp_type}&measure=1&measures=20100")
   if(api_key != ''){

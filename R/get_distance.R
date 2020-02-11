@@ -59,7 +59,7 @@
 #' @export
 
 get_distance <- function(data, origins, destinations,
-                          mode= c('driving','walking', 'cycling', 'transit'), departing = F,
+                          mode= c('driving','walking', 'cycling', 'transit'), departing = FALSE,
                           model = c('best_guess','pessimistic', 'optimistic'),
                           google_api_key = Sys.getenv('google_api_key')) {
   # match args
@@ -81,7 +81,7 @@ get_distance <- function(data, origins, destinations,
 
 
   # check parameters
-  if(departing ==F & model != 'best_guess'){
+  if(departing == FALSE & model != 'best_guess'){
     warning(glue::glue('traffic model {model} is not available without a departure time set'))
   }
 
