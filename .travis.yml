@@ -5,8 +5,15 @@ r:
   - release
   - devel
 
-sudo: true
+sudo: required
 cache: packages
+
+addons:
+  apt:
+    packages:
+      - libudunits2-dev
+      - libproj-dev
+      - libgeos-dev
 
 after_success:
   - Rscript -e 'covr::codecov(quiet=FALSE)'

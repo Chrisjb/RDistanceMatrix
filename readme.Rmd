@@ -33,7 +33,7 @@ The isochrone method generates a polygon of the total area to which one can trav
 ### 1.1 mapbox method
 
 To use the mapbox method we need to get ourselves an API key and set it up on R. See section (x.x.x) for how to do this. 
-```{r mapbox1, message = FALSE}
+```{r mapbox1, message = FALSE, cache=TRUE}
 library(RDistanceMatrix)
 battersea_isochrone <- make_isochrone(site = 'Battersea Power Station', time = 30, method = 'mapbox', mode= 'driving')
 ```
@@ -71,7 +71,7 @@ make_isochrone(site = 'battersea power station', time = 30, method = 'google_gue
 #### 1.2.2 Creating an isochrone with google method
 Once we have a well calibrated `multiplier` parameter, the algorithm will create a more detailed version of the isochrone by chainging the method to `method='google'`. We have the choice of `high`, `medium` or `low` detail. The former will use more of our API quota and cost us more credits (see information on google api credits below). The default is medium detail which should be sufficient for most purposes.
 
-```{r google2}
+```{r google2, cache=TRUE}
 battersea_isochrone_google <- make_isochrone(site = 'Battersea Power Station', time = 30, method = 'google', detail = 'med',  mode= 'driving', multiplier = 0.4)
 ```
 
@@ -88,7 +88,7 @@ ggplot() +
 
 We can increase the detail of our google isochrone (costing us more credits):
 
-```{r}
+```{r, cache=TRUE}
 battersea_isochrone_google_high <- make_isochrone(site = 'Battersea Power Station', time = 30, method = 'google', detail = 'high',  mode= 'driving', multiplier = 0.4)
 ```
 
@@ -107,7 +107,7 @@ ggplot() +
 #### 1.2.3 Other options with the google method
 With the google method we have the ability to reverse the direction (what origins are there that can we leave from and arrive at the site within x minutes?). We can also set the departure time to a peak hour to get the isochrone accounting for traffic, or we can use `mode=transit` to get an isochrone using public transport.
 
-```{r}
+```{r, cache=TRUE}
 battersea_isochrone_google_pt <- make_isochrone(site = 'Battersea Power Station', time = 30, method = 'google', detail = 'high',  mode= 'transit', multiplier = 0.4)
 ```
 
@@ -120,7 +120,7 @@ ggplot() +
 ```
 
 let's see what happens with traffic. Note that the `departing` parameter must be set to a date and time in the future.
-```{r}
+```{r, cache=TRUE}
 battersea_isochrone_google_traffic <- make_isochrone(site = 'Battersea Power Station', time = 30, method = 'google', detail = 'med',  mode= 'driving', multiplier = 0.25,
                                                 departing = '2020-03-02 08:00:00')
 ```
@@ -137,7 +137,7 @@ ggplot() +
 
 Is it better getting *to* battersea than *from*?
 
-```{r}
+```{r, cache=TRUE}
 battersea_isochrone_google_traffic_inbound <- make_isochrone(site = 'Battersea Power Station', time = 30, direction = 'in', 
                                                         method = 'google', detail = 'med',  mode= 'driving', multiplier = 0.25,
                                                         departing = '2020-03-02 08:00:00')
@@ -161,9 +161,11 @@ Creates a simple features polygon of the area accessible to/from a given locatio
 As with `make_isochrone`, we can set the detail level `detail = c('high', 'medium', 'low')` to get a more/less accurate isodistance polygon at the expense of more/less google API credits (see below). 
 
 **examples:**
-```{r}
+```{r, cache=TRUE}
 walk_radius <- make_isodistance('EC2R 8AH', distance = 2000, direction = 'out', mode = 'walking',)
+```
 
+```{r plot_walk_radius}
 ggplot() +
   base_map(bbox = st_bbox(walk_radius), increase_zoom = 2,basemap = 'google') +
   geom_sf(data = walk_radius, fill=NA)
@@ -254,7 +256,7 @@ The function works by intersecting [Lower Layer Super Output Areas](https://en.w
 
 The dataset returned contains population data for each LSOA within our boundary (`population`), the percentage of the LSOA that lies within our boundary (`overlap`), and the *estimated* population that actually lies within the boundary (`population_within`). The `population_within` column assumes that population is evenly distributed throughout the LSOA so is an **estimate rather than a precise figure**.
 
-```{r}
+```{r, cache=TRUE}
 iso <- make_isochrone(site = 'bath abbey, bath, uk', time = 30, method = 'mapbox', mode = 'driving')
 pop_all_ages <- get_population_within(iso, year ='latest',age = 'all')
 
@@ -262,7 +264,7 @@ glimpse(pop_all_ages)
 ```
 
 We can also split by age group. Options include `working`,`five_year` and `sya` (single year of age).
-```{r}
+```{r, cache=TRUE}
 library(dplyr)
 pop_working <- get_population_within(iso, year ='latest',age = 'working')
 
@@ -278,7 +280,7 @@ The function works by intersecting [Lower Layer Super Output Areas](https://en.w
 
 The dataset returned contains employment data for each LSOA within our boundary (`employment`), the percentage of the LSOA that lies within our boundary (`overlap`), and the *estimated* employment that actually lies within the boundary (`employment_within`). The `employment_within` column assumes that employment is evenly distributed throughout the LSOA so is an **estimate rather than a precise figure**.
 
-```{r}
+```{r, cache=TRUE}
 iso <- make_isochrone(site = 'Barrow-in-Furness, Cumrbia', time = 20, method = 'mapbox', mode = 'driving')
 emp_all_ind <- get_employment_within(iso, year ='latest',industry =  'all')
 
@@ -286,7 +288,7 @@ glimpse(emp_all_ind)
 ```
 
 If we set the `type` option to 'employees' rather than 'employment', we can split by part-time/full-time employees. 
-```{r}
+```{r, cache=TRUE}
 library(dplyr)
 pt_ft <- get_employment_within(iso, year ='latest',type = 'employees', split = TRUE)
 
@@ -303,7 +305,7 @@ We can also get the industry break down of employees in the area. Options includ
 * `sections` for sections
 * `2digit` for two digit SIC codes
 
-```{r}
+```{r, cache=TRUE}
 library(dplyr)
 emp_broad <- get_employment_within(iso, year ='latest',industry = 'broad')
 

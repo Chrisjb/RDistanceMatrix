@@ -1,9 +1,16 @@
 readme
 ================
-Chris
-02/02/2020
 
 ## RDistanceMatrix
+
+[![License:
+MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![GitHub
+tag](https://img.shields.io/github/tag/chrisjb/RDistanceMatrix.svg)](https://github.com/chrisjb/RDistanceMatrix)
+[![Travis Build
+Status](https://travis-ci.org/chrisjb/RDistanceMatrix.svg?branch=master)](https://travis-ci.org/chrisjb/RDistanceMatrix)
+[![Coverage
+Status](https://img.shields.io/codecov/c/github/chrisjb/RDistanceMatrix/master.svg)](https://codecov.io/github/chrisjb/RDistanceMatrix?branch=master)
 
 This package contains functions to geocode locations and generate
 isochrones/isodistance polygons. It also allows for the estimation of
@@ -131,7 +138,7 @@ battersea_isochrone_google <- make_isochrone(site = 'Battersea Power Station', t
 
     ## Trying URL: 4 of 4
 
-    ## Google API elements used: 475 (£2.375 credits). Isochrone generated to accuracy of 509m
+    ## Google API elements used: 476 (£2.38 credits). Isochrone generated to accuracy of 509m
 
 If we compare the results of our mapbox isochrone (red) with the google
 isochrone (blue), we see that the results are broadly similar but the
@@ -236,7 +243,7 @@ battersea_isochrone_google_pt <- make_isochrone(site = 'Battersea Power Station'
 
     ## Trying URL: 8 of 8
 
-    ## Google API elements used: 870 (£4.35 credits). Isochrone generated to accuracy of 196m
+    ## Google API elements used: 807 (£4.035 credits). Isochrone generated to accuracy of 237m
 
 With public transport (blue) we can’t get as far from Battersea Power
 station as we could by car (red).
@@ -275,7 +282,7 @@ battersea_isochrone_google_traffic <- make_isochrone(site = 'Battersea Power Sta
 
     ## Trying URL: 4 of 4
 
-    ## Google API elements used: 478 (£4.78 credits). Isochrone generated to accuracy of 368m
+    ## Google API elements used: 486 (£4.86 credits). Isochrone generated to accuracy of 442m
 
 In 8am traffic (blue) we can now only travel a bit further then by
 public transport (green).
@@ -317,7 +324,7 @@ battersea_isochrone_google_traffic_inbound <- make_isochrone(site = 'Battersea P
 
     ## Trying URL: 4 of 4
 
-    ## Google API elements used: 466 (£4.66 credits). Isochrone generated to accuracy of 392m
+    ## Google API elements used: 475 (£4.75 credits). Isochrone generated to accuracy of 423m
 
 Inbound travel time (green) seems to be broadly similar to outbound time
 (blue) in this case.
@@ -368,7 +375,7 @@ ggplot() +
 
     ## please see attribution details: https://wikimediafoundation.org/wiki/Maps_Terms_of_Use
 
-![](readme_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
+![](readme_files/figure-gfm/plot_walk_radius-1.png)<!-- -->
 
 ### 3\. get\_distance
 
@@ -391,7 +398,7 @@ get_distance(od1, origin, destination, mode = 'transit')
     ## # A tibble: 1 x 4
     ##   origin           destination transit_distance transit_time
     ##   <chr>            <chr>                  <dbl>        <dbl>
-    ## 1 51.5131,-0.09182 EC2R 8AH                 553         4.32
+    ## 1 51.5131,-0.09182 EC2R 8AH                 553         4.73
 
 Multiple origin destination:
 
