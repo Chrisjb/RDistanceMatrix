@@ -2,7 +2,7 @@
 #'
 #' Helper function to set the google API key as an environment variable
 #'
-#' @param key
+#' @param key the api key for google cloud console. It must be enabled for the google distance matrix API and geocoding API.
 #'
 #'
 #' @examples
