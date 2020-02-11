@@ -15,7 +15,7 @@
 #'
 #' @importFrom glue glue
 #' @importFrom sf st_intersection st_transform st_drop_geometry st_area
-#' @importFrom dplyr mutate select rename if_else case_when filter left_join
+#' @importFrom dplyr mutate select rename if_else case_when filter left_join summarise
 #' @importFrom readr cols
 #' @importFrom janitor clean_names
 #' @importFrom httr GET content http_type http_error
@@ -25,7 +25,7 @@
 #' emp <- get_employment_within(iso, 'latest', industry = 'all')
 #' # total employment within isochrone:
 #' emp %>%
-#'  summarise(total_emp = sum(employment_within))
+#'  dplyr::summarise(total_emp = sum(employment_within))
 #'
 #' @export
 
@@ -61,7 +61,7 @@ get_employment_within <- function(boundary, year = 'latest', type = 'employment'
   df <- tryCatch({
     httr::content(res, col_types= readr::cols()) %>%
       janitor::clean_names() %>%
-      select(date, geography_code, geography_name, geography_type, industry_code, industry_name, employment_status_name, employment = obs_value, obs_status_name, obs_status)
+      dplyr::select(date, geography_code, geography_name, geography_type, industry_code, industry_name, employment_status_name, employment = obs_value, obs_status_name, obs_status)
   },
   error = function(e){
     stop(glue::glue('error: {e}'))
