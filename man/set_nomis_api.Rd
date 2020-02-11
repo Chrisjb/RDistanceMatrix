@@ -13,10 +13,12 @@ set_nomis_api(key)
 Helper function to set the NOMIS API key as an environment variable
 }
 \examples{
+\dontrun{
 set_nomis_api('<api key here>')
 # Check our assignment worked
 Sys.getenv('nomis_api_key')
 
 #[1] "<api key here>"
+}
 
 }

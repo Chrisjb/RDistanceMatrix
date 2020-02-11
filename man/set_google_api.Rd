@@ -13,10 +13,11 @@ set_google_api(key)
 Helper function to set the google API key as an environment variable
 }
 \examples{
+\dontrun{
 set_google_api('<api key here>')
 # Check our assignment worked
 Sys.getenv('google_api_key')
 
 #[1] "<api key here>"
-
+}
 }

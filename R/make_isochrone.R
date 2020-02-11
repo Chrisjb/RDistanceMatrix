@@ -75,7 +75,7 @@ make_isochrone <- function(site, time, direction = c('out','in'),
     mapbox_url <- glue::glue('https://api.mapbox.com/isochrone/v1/mapbox/{mode}/{coordinates}?contours_minutes={time}&polygons=true&access_token={api_key}')
     mapbox_url_secret <- gsub(api_key, "SECRET", mapbox_url)
     message(glue::glue('fetching isochrone from url: {mapbox_url_secret}'))
-    poly <- read_sf(mapbox_url)
+    poly <- sf::read_sf(mapbox_url)
     if(all(sf::st_is_valid(poly))==F){
       poly <- lwgeom::st_make_valid(poly)
     }
@@ -147,15 +147,15 @@ make_isochrone <- function(site, time, direction = c('out','in'),
   message('adding detail to initial isochrone...')
 
   # get bounding box of our google maps initial poly to calibrate the buffers
-  bbox <- st_bbox(shp_init)
+  bbox <- sf::st_bbox(shp_init)
   left <- data.frame(lng = bbox[['xmin']], lat =bbox[['ymin']]) %>%
-    st_as_sf(coords = c('lng', 'lat'), crs= 4326)
+    sf::st_as_sf(coords = c('lng', 'lat'), crs= 4326)
   right <- data.frame(lng = bbox[['xmax']], lat =bbox[['ymin']]) %>%
-    st_as_sf(coords = c('lng', 'lat'), crs= 4326)
+    sf::st_as_sf(coords = c('lng', 'lat'), crs= 4326)
   top <- data.frame(lng = bbox[['xmin']], lat =bbox[['ymax']]) %>%
-    st_as_sf(coords = c('lng', 'lat'), crs= 4326)
+    sf::st_as_sf(coords = c('lng', 'lat'), crs= 4326)
   bottom <- data.frame(lng = bbox[['xmin']], lat =bbox[['ymin']]) %>%
-    st_as_sf(coords = c('lng', 'lat'), crs= 4326)
+    sf::st_as_sf(coords = c('lng', 'lat'), crs= 4326)
   width <- as.numeric(st_distance(left, right))
   height <- as.numeric(st_distance(top, bottom))
 
@@ -165,22 +165,22 @@ make_isochrone <- function(site, time, direction = c('out','in'),
 
   # find key buffer region where shp_range is the possible region for isochrone extents
   shp_max <- shp_init %>%
-    st_transform(27700) %>%
-    st_buffer(buffer_dist)  %>%
-    st_transform(4326)
+    sf::st_transform(27700) %>%
+    sf::st_buffer(buffer_dist)  %>%
+    sf::st_transform(4326)
 
   shp_min <- shp_init %>%
-    st_transform(27700) %>%
-    st_buffer(-buffer_dist)  %>%
-    st_transform(4326)
+    sf::st_transform(27700) %>%
+    sf::st_buffer(-buffer_dist)  %>%
+    sf::st_transform(4326)
 
   shp_range <- suppressMessages(
-    shp_max %>% st_difference(shp_min)
+    shp_max %>% sf::st_difference(shp_min)
   )
 
 
   # create grid of points over our bounding box
-  grid_bbox <- st_bbox(shp_max)
+  grid_bbox <- sf::st_bbox(shp_max)
 
   pts <- dplyr::case_when(detail == 'low' ~ max(floor(max(height, width)/2500),15),
                           detail %in% c('med','medium') ~ max(floor(max(height, width)/1000), 30),
@@ -193,14 +193,14 @@ make_isochrone <- function(site, time, direction = c('out','in'),
   grid <-  expand.grid(lat = lats, lng = lngs)
 
   grid <- grid %>%
-    st_as_sf(coords = c('lng','lat'),crs= 4326, remove = F)
+    sf::st_as_sf(coords = c('lng','lat'),crs= 4326, remove = F)
 
 
   # intersect grid with possible area range
-  st_agr(grid) ='constant'
+  sf::st_agr(grid) ='constant'
   donut <- suppressMessages(
     grid %>%
-    st_intersection(shp_range)
+    sf::st_intersection(shp_range)
   )
 
   # create matrix from our grid of points
@@ -210,7 +210,7 @@ make_isochrone <- function(site, time, direction = c('out','in'),
   # create points inside donut hole and set travel time to just less than the max time
   inner_pts <- suppressMessages(
     grid %>%
-    st_intersection(shp_min) %>%
+    sf::st_intersection(shp_min) %>%
     dplyr::mutate(latlng = paste0(round(lat,5),',',round(lng,5)),
            minutes = time -1)
     )
@@ -246,9 +246,9 @@ make_isochrone <- function(site, time, direction = c('out','in'),
   # join matrices
   distance_df <- suppressMessages(
     pts_mat %>%
-    st_join(df) %>%
+    sf::st_join(df) %>%
     dplyr::select(lng=lng.x, lat=lat.x, latlng=latlng.x, minutes) %>%
-    st_join(inner_pts,left = T) %>%
+    sf::st_join(inner_pts,left = T) %>%
     dplyr::mutate(minutes = dplyr::if_else(!is.na(`minutes.x`), `minutes.x`, `minutes.y`)) %>%
     dplyr::select(lng = lng.x, lat = lat.x, latlng = latlng.x, minutes)
     )

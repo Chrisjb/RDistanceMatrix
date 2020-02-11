@@ -24,9 +24,10 @@ The function geocodes a single address given as a character string. Be as specif
 To avoid loss of accuracy when geocoding a lat/lng string, the geoCode function does not geocode lat/lng strings but instead returns the same string as a dataframe.
 }
 \examples{
+\dontrun{
 geocode('London Bridge, London, UK', return_all = FALSE)
 
 #  lat        lng             type                           address
 #  51.50788 -0.0877321 GEOMETRIC_CENTER London Bridge, London SE1 9RA, UK
-
+}
 }

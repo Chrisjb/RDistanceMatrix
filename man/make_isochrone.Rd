@@ -47,4 +47,5 @@ library(leaflet)
 leaflet(driving_isochrone_mapbox) \%>\%
   addTiles() \%>\%
   addPolygons()
+
 }

@@ -31,6 +31,7 @@ an sf polygon
 Generates an isodistance polygon for network distances to/from a specified location.
 }
 \examples{
+
 walk_radius <- make_isodistance('EC2R 8AH', distance = 2000, direction = 'out', mode = 'walking')
 
 

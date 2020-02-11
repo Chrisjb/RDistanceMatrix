@@ -26,6 +26,10 @@
 
 
 geocode_mapbox <- function(address, api_key=Sys.getenv('mapbox_api_key'),return_all = TRUE) {
+  # if mapbox api key is empty, return error
+  if(api_key ==''){
+    stop('An API key is required to geocode')
+  }
   # if address is in lat lng form, do not geocode.
   if(isLatLng(address)){
     return(data.frame(lat=getLat(address),lng=getLng(address),type=NA, address='User Defined Location'))

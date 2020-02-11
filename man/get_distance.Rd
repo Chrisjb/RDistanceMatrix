@@ -31,7 +31,7 @@ a data.frame containing the coordinates, location type and approximate address.
 Fetch the distance between sets of origins and destinations using Google Distance Matrix API
 }
 \examples{
-
+\dontrun{
 ## Example with a dataframe of origins (lat lng) and a single destination
 df <- tibble::tribble(
 ~ lat, ~lng,
@@ -70,5 +70,5 @@ get_distance(pcd_df, origin, destination)
 # 2 "51.5037,-0.01715"  E14 5AB                  867         3.33
 # 3 " 51.5320,-0.12343" SE1 9SG                 5747        24.0
 # 4 "51.4447,-0.33749"  SW1A 1AA               16895        40.2
-
+}
 }

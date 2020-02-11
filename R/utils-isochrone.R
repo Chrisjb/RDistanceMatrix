@@ -111,6 +111,11 @@ distance_to_destinations <- function(origin,dest,mode,departing=F,model='best_gu
 
     u <- dist_url(origin,dest_txt,mode,departing,model,api_key=api_key)
 
+    # don't include ferries in walk directions
+    if(mode == 'walking') {
+    u <- gsub('(.+&mode=[A-Za-z]+)(&key=.+)','\\1&avoid=ferries\\2',u)
+    }
+
     u_secret <- gsub(api_key, '<api_key_here>', u)
     if(lots > 1){
       message(glue::glue('Trying URL: {i} of {lots}', ))
@@ -156,12 +161,12 @@ check_request_valid <- function(method, mapbox_api_key, google_api_key, directio
   # ensure API Key is correct
   if(method %in% c('google','google_guess') ){
     assign('api_key', google_api_key, envir = parent.frame())
-    if(Sys.getenv('google_api_key') == ''){
+    if(google_api_key== ''){
       stop('please set google api key (see set_google_api)')
     }
   } else if(method == 'mapbox'){
     assign('api_key', mapbox_api_key, envir = parent.frame())
-    if(Sys.getenv('mapbox_api_key') == ''){
+    if(mapbox_api_key == ''){
       stop('please set mapbox api key (see set_mapbox_api)')
     }
     if(direction == 'in'){

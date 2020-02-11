@@ -13,10 +13,11 @@ set_mapbox_api(key)
 Helper function to set the mapbox API key as an environment variable
 }
 \examples{
+\dontrun{
 set_mapbox_api('<api key here>')
 # Check our assignment worked
 Sys.getenv('mapbox_api_key')
 
 #[1] "<api key here>"
-
+}
 }
