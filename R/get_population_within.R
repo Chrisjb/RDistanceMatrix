@@ -13,7 +13,7 @@
 #'
 #' @importFrom glue glue
 #' @importFrom sf st_intersection st_transform
-#' @importFrom dplyr mutate select rename if_else case_when left_join
+#' @importFrom dplyr mutate select rename if_else case_when left_join summarise
 #' @importFrom janitor clean_names
 #' @importFrom httr GET content http_type http_error
 #'
@@ -22,7 +22,7 @@
 #' pop <- get_population_within(iso, 'latest', age = 'all')
 #' # total employment within isochrone:
 #' pop %>%
-#'  summarise(total_pop = sum(population_within))
+#'  dplyr::summarise(total_pop = sum(population_within))
 #'
 #' @export
 #'
@@ -55,7 +55,7 @@ get_population_within <- function(boundary, year = 'latest', age = 'all', api_ke
   df <- tryCatch({
     httr::content(res, col_types =cols()) %>%
       janitor::clean_names() %>%
-      select(date, geography_code, geography_name, geography_type, gender_name, age = c_age_name, age_type = c_age_type, population = obs_value, record_count)
+      dplyr::select(date, geography_code, geography_name, geography_type, gender_name, age = c_age_name, age_type = c_age_type, population = obs_value, record_count)
   },
   error = function(e){
     glue::glue('error: {e}')

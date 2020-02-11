@@ -136,7 +136,7 @@ make_isochrone <- function(site, time, direction = c('out','in'),
       leaflet::addMarkers(data=site) %>%
       leaflet::addCircles(data=df_init,lng = ~lng,lat=~lat,col='grey',radius = 0.2,popup=~paste0(lng,', ',lat,'  TIME:',minutes))
     credits <- dplyr::if_else(departing == F, length(df_init$latlng)*0.005, length(df_init$latlng)*0.01)
-    message(glue::glue('Google API elements used: {length(df_init$latlng)} (£{credits} credits)'))
+    message(glue::glue('Google API elements used: {length(df_init$latlng)} (\u00A3{credits} credits)'))
     return(chrone_map)
   }
 
@@ -220,7 +220,7 @@ make_isochrone <- function(site, time, direction = c('out','in'),
   credits <- dplyr::if_else(departing == F, elements*0.005, elements*0.01)
 
   if(credits >= 10) {
-    warning("Large Query Warning: request will use {elements} elements (£{credits} credits).")
+    warning("Large Query Warning: request will use {elements} elements (\u00A3{credits} credits).")
     response <- readline(prompt=paste0("Continue? (y/n)"))
 
     if(!response %in% c('y', 'Y')) {
@@ -270,7 +270,7 @@ make_isochrone <- function(site, time, direction = c('out','in'),
     sf::st_union() %>%
     sf::st_sf()
 
-  message(glue::glue('Google API elements used: {elements} (£{credits} credits). Isochrone generated to accuracy of {round(tolerence)}m'))
+  message(glue::glue('Google API elements used: {elements} (\u00A3{credits} credits). Isochrone generated to accuracy of {round(tolerence)}m'))
   if(all(sf::st_is_valid(shp))==F){
     shp <- lwgeom::st_make_valid(shp)
   }

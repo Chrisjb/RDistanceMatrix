@@ -12,7 +12,7 @@ make_isodistance(site, distance, direction = c("out", "in"),
 \arguments{
 \item{site}{either a data.frame with the columns 'lat' and 'lng' or a character string to be geocoded.}
 
-\item{distance}{a numeric value in meters - the distance to the isochrone extents.}
+\item{distance}{a numeric value in meters. This is the network distance from the site to the isochrone extents.}
 
 \item{direction}{either 'in' or 'out'. In generates an isochrone from multiple origins to the site. Out goes from the site to multiple destinations.}
 

@@ -28,6 +28,6 @@ iso <- make_isochrone(site = 'SE1 9SG', time = 30, method = 'mapbox', mode = 'dr
 pop <- get_population_within(iso, 'latest', age = 'all')
 # total employment within isochrone:
 pop \%>\%
- summarise(total_pop = sum(population_within))
+ dplyr::summarise(total_pop = sum(population_within))
 
 }

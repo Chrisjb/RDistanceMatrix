@@ -3,7 +3,7 @@
 #' Generates an isodistance polygon for network distances to/from a specified location.
 #'
 #' @param site either a data.frame with the columns 'lat' and 'lng' or a character string to be geocoded.
-#' @param distance a numeric value in meters - the distance to the isochrone extents.
+#' @param distance a numeric value in meters. This is the network distance from the site to the isochrone extents.
 #' @param direction either 'in' or 'out'. In generates an isochrone from multiple origins to the site. Out goes from the site to multiple destinations.
 #' @param detail 'low', 'medium' or 'high' level of detail in the isochrone. High will produce the most granular detail but will use more API credits.
 #' @param mode a character string for the mode of travel. Possible values are 'driving', 'cycling', 'transit', or 'walking'
@@ -177,7 +177,7 @@ make_isodistance <- function(site, distance, direction = c('out', 'in'),
   credits <- dplyr::if_else(departing == FALSE, elements*0.005, elements*0.01)
 
   if(credits >= 10) {
-    warning("Large Query Warning: request will use {elements} elements (£{credits} credits).")
+    warning("Large Query Warning: request will use {elements} elements (\u00A3{credits} credits).")
     response <- readline(prompt=paste0("Continue? (y/n)"))
 
     if(!response %in% c('y', 'Y')) {
@@ -227,7 +227,7 @@ make_isodistance <- function(site, distance, direction = c('out', 'in'),
     sf::st_union() %>%
     sf::st_sf()
 
-  message(glue::glue('Google API elements used: {elements} (£{credits} credits). Isochrone generated to accuracy of {round(tolerence)}m'))
+  message(glue::glue('Google API elements used: {elements} (\u00A3{credits} credits). Isochrone generated to accuracy of {round(tolerence)}m'))
   if(all(sf::st_is_valid(shp))==FALSE){
     shp <- lwgeom::st_make_valid(shp)
   }
