@@ -13,6 +13,7 @@ library(tidyverse)
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![GitHub tag](https://img.shields.io/github/tag/chrisjb/RDistanceMatrix.svg)](https://github.com/chrisjb/RDistanceMatrix)
+[![Travis Build Status](https://travis-ci.org/chrisjb/RDistanceMatrix.svg?branch=master)](https://travis-ci.org/chrisjb/RDistanceMatrix)
 [![Coverage Status](https://img.shields.io/codecov/c/github/chrisjb/RDistanceMatrix/master.svg)](https://codecov.io/github/chrisjb/RDistanceMatrix?branch=master)
 
 
