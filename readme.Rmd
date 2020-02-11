@@ -7,6 +7,10 @@ always_allow_html: yes
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
+library(sf)
+library(RDistanceMatrix)
+library(basemapR)
+library(leaflet)
 ```
 
 ## RDistanceMatrix
@@ -32,7 +36,7 @@ The isochrone method generates a polygon of the total area to which one can trav
 
 ### 1.1 mapbox method
 
-To use the mapbox method we need to get ourselves an API key and set it up on R. See section (x.x.x) for how to do this. 
+To use the mapbox method we need to get ourselves an API key and set it up on R. See section (6.2) for how to do this. 
 ```{r mapbox1, message = FALSE, cache=TRUE}
 library(RDistanceMatrix)
 battersea_isochrone <- make_isochrone(site = 'Battersea Power Station', time = 30, method = 'mapbox', mode= 'driving')
@@ -314,7 +318,7 @@ emp_broad %>%
   summarise(estimated_emp = sum(employment_within))  
 ```
 
-### Getting a google API Key
+### 6.1 Getting a google API Key
 1. [https://accounts.google.com/SignUp?hl=en&continue=https://myaccount.google.com/intro](Create a Google account)
 2. Head to the [https://console.cloud.google.com/](google cloud console) and log in
 3. Collect free trial credits: At the time of writing google are offering $300 in free credits to use over 12 months. You will have to submit billing info to collect this, but you will need to do this in a later step anyway.
@@ -358,7 +362,7 @@ To avoid going over the monthly limit, pay attention to the messages that are ou
 If you're unsure how much usage you have left for the month, visit the [APIs and services dashboard](https://console.cloud.google.com/apis/dashboard) for your project, click on our API (Distance Matrix API) and you can view how many elements used each day over the past month.
 
 
-### Getting a mapbox API Key
+### 6.2 Getting a mapbox API Key
 1. [sign up for mapbox](https://www.mapbox.com/)
 2. [Head to your account page](https://account.mapbox.com/)
 3. Scroll down to see an option to create an api key 
@@ -374,7 +378,7 @@ Setting the API key in this way should mean that the API key is always accessibl
 and paste in the line:
 mapbox_api_key = '<your key here>'
 
-### Getting a Nomis API Key
+### 6.3 Getting a Nomis API Key
 1. [Sign up for a NOMIS account](https://www.nomisweb.co.uk/myaccount/userjoin.asp)
 2. Once signed in, click on your name to reveal the account menu and click on 'account summary'
 3. Scroll down and click 'NOMIS API' in the menu to the left
