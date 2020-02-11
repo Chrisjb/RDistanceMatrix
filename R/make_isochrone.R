@@ -24,8 +24,10 @@
 #' @importFrom httr GET content http_error http_status
 #'
 #' @examples
-#' transit_isochrone <- make_isochrone(site = 'London Bridge Station, London, UK', time = 30,  direction ='out',  multiplier = 0.7, mode = 'transit')
-#' driving_isochrone_mapbox <- make_isochrone(site = 'London Bridge Station, London, UK', time = 30, method = 'mapbox', mode = 'driving')
+#' transit_isochrone <- make_isochrone(site = 'London Bridge Station, London, UK', time = 30,
+#'   direction ='out',  multiplier = 0.7, mode = 'transit')
+#' driving_isochrone_mapbox <- make_isochrone(site = 'London Bridge Station, London, UK',
+#'  time = 30, method = 'mapbox', mode = 'driving')
 #'
 #' library(leaflet)
 #' leaflet(driving_isochrone_mapbox) %>%
