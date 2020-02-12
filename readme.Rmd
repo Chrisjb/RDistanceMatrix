@@ -319,8 +319,8 @@ emp_broad %>%
 ```
 
 ### 6.1 Getting a google API Key
-1. [https://accounts.google.com/SignUp?hl=en&continue=https://myaccount.google.com/intro](Create a Google account)
-2. Head to the [https://console.cloud.google.com/](google cloud console) and log in
+1. [Create a Google account](https://accounts.google.com/SignUp?hl=en&continue=https://myaccount.google.com/intro)
+2. Head to the [google cloud console](https://console.cloud.google.com/) and log in
 3. Collect free trial credits: At the time of writing google are offering $300 in free credits to use over 12 months. You will have to submit billing info to collect this, but you will need to do this in a later step anyway.
 
 ![try google cloud free](./documentation_files/api-setup/try_free.png)
