@@ -142,7 +142,7 @@ battersea_isochrone_google <- make_isochrone(site = 'Battersea Power Station', t
 
 If we compare the results of our mapbox isochrone (red) with the google
 isochrone (blue), we see that the results are broadly similar but the
-goolgle one is more generalised. The mapbox version does a better job at
+google one is more generalised. The mapbox version does a better job at
 sticking to the road network and following the roads out as long as to
 their 30 minute extents. For this reason, we should prefer the mapbox
 version for tasks that can be accomplished with the mapbox API.
@@ -395,10 +395,24 @@ od1 <- tibble::tibble(
 get_distance(od1, origin, destination, mode = 'transit')
 ```
 
+    ## Warning: Prefixing `UQ()` with the rlang namespace is deprecated as of rlang 0.3.0.
+    ## Please use the non-prefixed form or `!!` instead.
+    ## 
+    ##   # Bad:
+    ##   rlang::expr(mean(rlang::UQ(var) * 100))
+    ## 
+    ##   # Ok:
+    ##   rlang::expr(mean(UQ(var) * 100))
+    ## 
+    ##   # Good:
+    ##   rlang::expr(mean(!!var * 100))
+    ## 
+    ## This warning is displayed once per session.
+
     ## # A tibble: 1 x 4
     ##   origin           destination transit_distance transit_time
     ##   <chr>            <chr>                  <dbl>        <dbl>
-    ## 1 51.5131,-0.09182 EC2R 8AH                 553         4.28
+    ## 1 51.5131,-0.09182 EC2R 8AH                 553         4.57
 
 Multiple origin destination:
 
@@ -687,10 +701,10 @@ emp_broad %>%
 
 ### 6.1 Getting a google API Key
 
-1.  [https://accounts.google.com/SignUp?hl=en\&continue=https://myaccount.google.com/intro](Create%20a%20Google%20account)
-2.  Head to the
-    [https://console.cloud.google.com/](google%20cloud%20console) and
-    log in
+1.  [Create a Google
+    account](https://accounts.google.com/SignUp?hl=en&continue=https://myaccount.google.com/intro)
+2.  Head to the [google cloud
+    console](https://console.cloud.google.com/) and log in
 3.  Collect free trial credits: At the time of writing google are
     offering $300 in free credits to use over 12 months. You will have
     to submit billing info to collect this, but you will need to do this
@@ -759,6 +773,20 @@ If you’re unsure how much usage you have left for the month, visit the
 dashboard](https://console.cloud.google.com/apis/dashboard) for your
 project, click on our API (Distance Matrix API) and you can view how
 many elements used each day over the past month.
+
+#### Setting up google cloud billing alerts
+
+If you’re worried about going over the free allowance, it’s possible to
+set up billing alerts so google will email you when you are at, say,
+50%, and 90% of your free credit limit.
+
+Head to the [cloud console billing
+dashboard](console.cloud.google.com/billing/) and in the menu you should
+see *Budgets & alerts*. Create a budget with an alert to email us at set
+percentages of our budget. Set the target amount to £200 or the amount
+of the free allowance, and *untick include credits in cost*. (you could
+also set the target amount to 0 and tick *include credits in cost* but
+the UI won’t be quite as informative).
 
 ### 6.2 Getting a mapbox API Key
 
