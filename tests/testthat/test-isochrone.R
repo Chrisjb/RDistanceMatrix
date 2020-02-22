@@ -1,7 +1,14 @@
 context('make_isochrone')
+skip_if_no_auth <- function(secret) {
+  if (identical(Sys.getenv(secret), "")) {
+    skip("No authentication available")
+  }
+}
 
 test_that("mapbox method returns sf", {
   skip_if_not_installed("sf")
+  skip_if_no_auth("google_api_key")
+  skip_if_no_auth("mapbox_api_key")
 
   mapbox_drv_iso <- make_isochrone(site = 'London Bridge Station, London, UK', time = 30,
                                    method = 'mapbox', direction ='out',
