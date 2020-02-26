@@ -75,6 +75,10 @@ make_isochrone <- function(site, time, direction = c('out','in'),
     mapbox_url <- glue::glue('https://api.mapbox.com/isochrone/v1/mapbox/{mode}/{coordinates}?contours_minutes={time}&polygons=true&access_token={api_key}')
     mapbox_url_secret <- gsub(api_key, "SECRET", mapbox_url)
     message(glue::glue('fetching isochrone from url: {mapbox_url_secret}'))
+    mb_res <- httr::GET(mapbox_url)
+    if(httr::http_error(mapbox_url)){
+      stop(httr::content(mb_res)$message)
+    }
     poly <- sf::read_sf(mapbox_url)
     if(all(sf::st_is_valid(poly))==F){
       poly <- lwgeom::st_make_valid(poly)
@@ -182,7 +186,8 @@ make_isochrone <- function(site, time, direction = c('out','in'),
   # create grid of points over our bounding box
   grid_bbox <- sf::st_bbox(shp_max)
 
-  pts <- dplyr::case_when(detail == 'low' ~ max(floor(max(height, width)/2500),15),
+  pts <- dplyr::case_when(detail == 'min' ~ 15,
+                          detail == 'low' ~ max(floor(max(height, width)/2500),15),
                           detail %in% c('med','medium') ~ max(floor(max(height, width)/1000), 30),
                           detail == 'high' ~ max(floor(max(height, width)/500),40))
 
@@ -223,7 +228,7 @@ make_isochrone <- function(site, time, direction = c('out','in'),
   credits <- dplyr::if_else(departing == F, elements*0.005, elements*0.01)
 
   if(credits >= 10) {
-    warning("Large Query Warning: request will use {elements} elements (\u00A3{credits} credits).")
+    message(glue::glue("Large Query Warning: request will use {elements} elements (\u00A3{credits} credits)."))
     response <- readline(prompt=paste0("Continue? (y/n)"))
 
     if(!response %in% c('y', 'Y')) {
