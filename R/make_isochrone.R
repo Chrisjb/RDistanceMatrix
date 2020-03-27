@@ -163,8 +163,8 @@ make_isochrone <- function(site, time, direction = c('out','in'),
   width <- as.numeric(st_distance(left, right))
   height <- as.numeric(st_distance(top, bottom))
 
-  # set buffer to 10% of max(height,width)
-  buffer_dist <- max(height, width) * 0.1
+  # set buffer to 15% of max(height,width)
+  buffer_dist <- max(height, width) * 0.15
 
 
   # find key buffer region where shp_range is the possible region for isochrone extents
