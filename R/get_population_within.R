@@ -83,7 +83,7 @@ get_population_within <- function(boundary, year = 'latest', age = 'all', api_ke
   if(length(codes)>1000){
     message('long request. Fetching remaining pages...')
     remaining_codes <- codes[1001:length(codes)]
-    chunks <- ceiling(remaining_codes / 1000)
+    chunks <- ceiling(length(remaining_codes) / 1000)
     for(i in 1:chunks) {
       chunk_codes <- codes[(i*1000+1):((i+1)*1000)]
       u <- glue::glue("https://www.nomisweb.co.uk/api/v01/dataset/NM_2010_1.data.csv?geography={paste0(chunk_codes,collapse=',')}&date={year}&gender=0&c_age={age_group}&measures=20100")
