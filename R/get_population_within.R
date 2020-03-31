@@ -85,7 +85,9 @@ get_population_within <- function(boundary, year = 'latest', age = 'all', api_ke
     remaining_codes <- codes[1001:length(codes)]
     chunks <- ceiling(length(remaining_codes) / 1000)
     for(i in 1:chunks) {
+      message('additional page ',i)
       chunk_codes <- codes[(i*1000+1):((i+1)*1000)]
+      chunk_codes <- chunk_codes[!is.na(chunk_codes)]
       u <- glue::glue("https://www.nomisweb.co.uk/api/v01/dataset/NM_2010_1.data.csv?geography={paste0(chunk_codes,collapse=',')}&date={year}&gender=0&c_age={age_group}&measures=20100")
       if(api_key != ''){
         u <- paste0(u, '&uid=',api_key)
@@ -98,6 +100,7 @@ get_population_within <- function(boundary, year = 'latest', age = 'all', api_ke
           janitor::clean_names() %>%
           dplyr::select(date, geography_code, geography_name, geography_type, gender_name, age = c_age_name, age_type = c_age_type, population = obs_value, record_count)
         df <- bind_rows(df, tmp)
+        Sys.sleep(1)
       }
     }
   }
