@@ -4,8 +4,11 @@
 \alias{geocode_mapbox}
 \title{Geocode a location using the mapbox geocode API.}
 \usage{
-geocode_mapbox(address, api_key = Sys.getenv("mapbox_api_key"),
-  return_all = TRUE)
+geocode_mapbox(
+  address,
+  api_key = Sys.getenv("mapbox_api_key"),
+  return_all = TRUE
+)
 }
 \arguments{
 \item{address}{character string with address to be geocoded. Be as specific as possible to avoid ambiguity.}

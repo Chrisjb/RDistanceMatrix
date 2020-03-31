@@ -4,8 +4,12 @@
 \alias{get_population_within}
 \title{Get Population Within Boundary}
 \usage{
-get_population_within(boundary, year = "latest", age = "all",
-  api_key = Sys.getenv("nomis_api_key"))
+get_population_within(
+  boundary,
+  year = "latest",
+  age = "all",
+  api_key = Sys.getenv("nomis_api_key")
+)
 }
 \arguments{
 \item{boundary}{an sf polygon in England or Wales.}

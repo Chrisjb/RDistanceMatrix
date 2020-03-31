@@ -4,11 +4,19 @@
 \alias{make_isochrone}
 \title{Make Time Isochrone}
 \usage{
-make_isochrone(site, time, direction = c("out", "in"),
-  detail = "medium", multiplier = 0.8, mode = c("driving", "walking",
-  "cycling", "transit"), departing = F, method = c("google", "mapbox",
-  "google_guess"), google_api_key = Sys.getenv("google_api_key"),
-  mapbox_api_key = Sys.getenv("mapbox_api_key"))
+make_isochrone(
+  site,
+  time,
+  direction = c("out", "in"),
+  detail = "medium",
+  multiplier = 0.8,
+  mode = c("driving", "walking", "cycling", "transit"),
+  departing = F,
+  method = c("google", "mapbox", "google_guess"),
+  init_grid_size = 10,
+  google_api_key = Sys.getenv("google_api_key"),
+  mapbox_api_key = Sys.getenv("mapbox_api_key")
+)
 }
 \arguments{
 \item{site}{either a data.frame with the columns 'lat' and 'lng' or a character string to be geocoded.}
@@ -26,6 +34,8 @@ make_isochrone(site, time, direction = c("out", "in"),
 \item{departing}{departure time can be set if we know the departure time and want to take into account traffic in the network for driving or transit modes. Departing should always be set to FALSE for walking or cycling modes. If required, departure time should be specified in the format 'YYYY-MM-DD HH:MM:SS'.}
 
 \item{method}{eithing 'google' or 'mapbox' method for generating isochrones. Read the vingette for more details. 'google_guess' is also available to tune the multiplier parameter.}
+
+\item{init_grid_size}{used for method='google' - adjust if we want to pick up more points in the 'google_guess' stage before adding detail. Useful for longer travel times (>60mins).}
 
 \item{google_api_key}{the google maps API key. This can be generated from the google cloud console and set using 'set_google_api'}
 

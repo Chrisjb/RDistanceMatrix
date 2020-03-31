@@ -4,8 +4,12 @@
 \alias{geocode}
 \title{geocode a location using the google maps geocode API.}
 \usage{
-geocode(address, api_key = Sys.getenv("google_api_key"),
-  verbose = FALSE, return_all = TRUE)
+geocode(
+  address,
+  api_key = Sys.getenv("google_api_key"),
+  verbose = FALSE,
+  return_all = TRUE
+)
 }
 \arguments{
 \item{address}{character string with address to be geocoded. Be as specific as possible to avoid ambiguity.}

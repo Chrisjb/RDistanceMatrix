@@ -4,10 +4,15 @@
 \alias{make_isodistance}
 \title{Make Isodistance}
 \usage{
-make_isodistance(site, distance, direction = c("out", "in"),
-  detail = "medium", mode = c("driving", "walking", "cycling",
-  "transit"), departing = FALSE,
-  google_api_key = Sys.getenv("google_api_key"))
+make_isodistance(
+  site,
+  distance,
+  direction = c("out", "in"),
+  detail = "medium",
+  mode = c("driving", "walking", "cycling", "transit"),
+  departing = FALSE,
+  google_api_key = Sys.getenv("google_api_key")
+)
 }
 \arguments{
 \item{site}{either a data.frame with the columns 'lat' and 'lng' or a character string to be geocoded.}
