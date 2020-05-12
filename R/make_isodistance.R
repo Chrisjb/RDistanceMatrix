@@ -14,7 +14,6 @@
 #' @return an sf polygon
 #'
 #' @import sf
-#' @importFrom lwgeom st_make_valid
 #' @importFrom maptools ContourLines2SLDF
 #' @importFrom utils URLencode
 #' @importFrom httr GET content http_error http_status
@@ -99,7 +98,7 @@ make_isodistance <- function(site, distance, direction = c('out', 'in'),
     sf::st_as_sf() %>%
     sf::st_set_crs(4326) %>%
     sf::st_cast('POLYGON') %>%
-    lwgeom::st_make_valid() %>%
+    sf::st_make_valid() %>%
     sf::st_union()
 
   # get bounding box of our google maps initial poly to calibrate the buffers
@@ -224,13 +223,13 @@ make_isodistance <- function(site, distance, direction = c('out', 'in'),
   shp <- maptools::ContourLines2SLDF(contour)
 
   shp <- shp %>% sf::st_as_sf() %>% sf::st_set_crs(4326) %>%
-    sf::st_cast('POLYGON') %>% lwgeom::st_make_valid() %>%
+    sf::st_cast('POLYGON') %>% sf::st_make_valid() %>%
     sf::st_union() %>%
     sf::st_sf()
 
   message(glue::glue('Google API elements used: {elements} (\u00A3{credits} credits). Isochrone generated to accuracy of {round(tolerence)}m'))
   if(all(sf::st_is_valid(shp))==FALSE){
-    shp <- lwgeom::st_make_valid(shp)
+    shp <- sf::st_make_valid(shp)
   }
   return(shp)
 }

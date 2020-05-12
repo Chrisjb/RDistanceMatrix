@@ -19,7 +19,6 @@
 #' @import sf
 #' @import leaflet
 #' @importFrom dplyr mutate select rename if_else case_when bind_rows
-#' @importFrom lwgeom st_make_valid
 #' @importFrom maptools ContourLines2SLDF
 #' @importFrom utils URLencode
 #' @importFrom httr GET content http_error http_status
@@ -83,7 +82,7 @@ make_isochrone <- function(site, time, direction = c('out','in'),
     }
     poly <- sf::read_sf(mapbox_url)
     if(all(sf::st_is_valid(poly))==F){
-      poly <- lwgeom::st_make_valid(poly)
+      poly <- sf::st_make_valid(poly)
     }
     return(poly)
   }
@@ -135,7 +134,7 @@ make_isochrone <- function(site, time, direction = c('out','in'),
 
   shp_init <- shp_init %>% sf::st_as_sf() %>%
     sf::st_set_crs(4326) %>% sf::st_cast('POLYGON') %>%
-    lwgeom::st_make_valid() %>% sf::st_union()
+    sf::st_make_valid() %>% sf::st_union()
 
 
   if(method == 'google_guess'){
@@ -276,13 +275,13 @@ make_isochrone <- function(site, time, direction = c('out','in'),
   shp <- maptools::ContourLines2SLDF(contour)
 
   shp <- shp %>% sf::st_as_sf() %>% sf::st_set_crs(4326) %>%
-    sf::st_cast('POLYGON') %>% lwgeom::st_make_valid() %>%
+    sf::st_cast('POLYGON') %>% sf::st_make_valid() %>%
     sf::st_union() %>%
     sf::st_sf()
 
   message(glue::glue('Google API elements used: {elements} (\u00A3{credits} credits). Isochrone generated to accuracy of {round(tolerence)}m'))
   if(all(sf::st_is_valid(shp))==F){
-    shp <- lwgeom::st_make_valid(shp)
+    shp <- sf::st_make_valid(shp)
   }
   return(shp)
 
