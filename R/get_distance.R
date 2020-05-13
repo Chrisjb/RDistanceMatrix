@@ -110,7 +110,7 @@ get_distance <- function(data, origins, destinations,
   }
 
   data %>%
-    dplyr::mutate(rlang::UQ(rlang::ensym(dist_col)) := as.numeric(dmat$dist),
-                  rlang::UQ(rlang::ensym(time_col)) := as.numeric(dmat$time)/60)
+    dplyr::mutate(!!ensym(dist_col) := as.numeric(dmat$dist),
+                  !!ensym(time_col) := as.numeric(dmat$time)/60)
 }
 
