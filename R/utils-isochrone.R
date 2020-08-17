@@ -34,7 +34,7 @@ dist_url <- function(origin, dest, mode, departing = F, model = 'best_guess',
 }
 
 
-distance_from_origins <- function(origin, dest, mode='driving', departing = F, model='best_guess', api_key = api_key) {
+distance_from_origins <- function(origin, dest, mode='driving', departing = F, model='best_guess', api_key = api_key, verbose=FALSE) {
   if(!(mode %in% c('driving','walking','cycle','cycling','bicycle','transit'))){
     stop('mode must be one of: driving, walking, cycle, transit')
   }
@@ -56,6 +56,9 @@ distance_from_origins <- function(origin, dest, mode='driving', departing = F, m
       break
     }
     u <- dist_url(origin_txt,dest,mode,departing,model, api_key=api_key)
+    if(verbose == TRUE) {
+      message('trying url: ', u)
+    }
     u_secret <- gsub(api_key, '<api_key_here>', u)
     if(lots > 1){
       message(glue::glue('Trying URL: {i} of {lots}', ))

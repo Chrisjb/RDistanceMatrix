@@ -21,12 +21,12 @@
 #' \dontrun{
 #' ## Example with a dataframe of origins (lat lng) and a single destination
 #' df <- tibble::tribble(
-#' ~ lat, ~lng,
-#' 51.5131, -0.09182,
-#' 51.5037, -0.01715,
-#' 51.5320, -0.12343,
-#' 51.4447, -0.33749
-#' )
+# ~ lat, ~lng,
+# 51.5131, -0.09182,
+# 51.5037, -0.01715,
+# 51.5320, -0.12343,
+# 51.4447, -0.33749
+# )
 #' origin_df <- dplyr::mutate(df, origin = paste0(lat,',',lng))
 #'
 #' get_distance(origin_df, origin, 'London Paddington')
@@ -63,7 +63,7 @@
 get_distance <- function(data, origins, destinations,
                           mode= c('driving','walking', 'cycling', 'transit'), departing = FALSE,
                           model = c('best_guess','pessimistic', 'optimistic'),
-                          google_api_key = Sys.getenv('google_api_key')) {
+                          google_api_key = Sys.getenv('google_api_key'),verbose=verbose) {
   # match args
   mode <- match.arg(mode)
   model <- match.arg(model)
@@ -89,12 +89,12 @@ get_distance <- function(data, origins, destinations,
 
   # if n_origins is 1, use distance_to_destinations
   if(n_origins ==1){
-    dmat <- distance_to_destinations(origin = origins,dest = destinations, mode=mode, departing=departing, model=model,api_key = google_api_key)
+    dmat <- distance_to_destinations(origin = origins,dest = destinations, mode=mode, departing=departing, model=model,api_key = google_api_key, verbose=verbose)
   } else if(n_destin ==1){
-    dmat <- distance_from_origins(origin = origins, dest = destinations, mode = mode, departing = departing, model = model, api_key=google_api_key)
+    dmat <- distance_from_origins(origin = origins, dest = destinations, mode = mode, departing = departing, model = model, api_key=google_api_key,verbose=verbose)
   } else {
     dmat_list <- apply(data.frame(origins, destinations),MARGIN = 1,
-                  function(x) distance_from_origins(origin = x[['origins']], dest = x[['destinations']], mode = mode, departing = departing, model = model, api_key=google_api_key)
+                  function(x) distance_from_origins(origin = x[['origins']], dest = x[['destinations']], mode = mode, departing = departing, model = model, api_key=google_api_key,verbose=verbose)
                   )
     dmat <- dplyr::bind_rows(dmat_list)
   }
