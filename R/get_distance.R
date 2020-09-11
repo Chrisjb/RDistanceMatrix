@@ -63,7 +63,7 @@
 get_distance <- function(data, origins, destinations,
                           mode= c('driving','walking', 'cycling', 'transit'), departing = FALSE,
                           model = c('best_guess','pessimistic', 'optimistic'),
-                          google_api_key = Sys.getenv('google_api_key'),verbose=verbose) {
+                          google_api_key = Sys.getenv('google_api_key'),verbose=FALSE) {
   # match args
   mode <- match.arg(mode)
   model <- match.arg(model)
@@ -89,7 +89,7 @@ get_distance <- function(data, origins, destinations,
 
   # if n_origins is 1, use distance_to_destinations
   if(n_origins ==1){
-    dmat <- distance_to_destinations(origin = origins,dest = destinations, mode=mode, departing=departing, model=model,api_key = google_api_key, verbose=verbose)
+    dmat <- distance_to_destinations(origin = origins,dest = destinations, mode=mode, departing=departing, model=model,api_key = google_api_key)
   } else if(n_destin ==1){
     dmat <- distance_from_origins(origin = origins, dest = destinations, mode = mode, departing = departing, model = model, api_key=google_api_key,verbose=verbose)
   } else {
