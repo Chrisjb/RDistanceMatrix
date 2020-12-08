@@ -34,7 +34,7 @@ dist_url <- function(origin, dest, mode, departing = F, model = 'best_guess',
 }
 
 
-distance_from_origins <- function(origin, dest, mode='driving', departing = F, model='best_guess', api_key = api_key, verbose=FALSE) {
+distance_from_origins <- function(origin, dest, mode='driving', departing = F, model='best_guess', api_key = api_key, verbose=FALSE, max_dimension = 25) {
   if(!(mode %in% c('driving','walking','cycle','cycling','bicycle','transit'))){
     stop('mode must be one of: driving, walking, cycle, transit')
   }
@@ -42,30 +42,37 @@ distance_from_origins <- function(origin, dest, mode='driving', departing = F, m
   dists_vec <- c()
   time_vec <- c()
 
-  # split into lots of 100 - google maps can't handle more than that
-  lots <- length(origin) %/% 100
-  if(length(dest) %% 100 != 0) {
+  # Google Map Distance Matrix Service API only allow 25 origins per request
+  lots <- length(origin) %/% max_dimension
+  if(length(dest) %% max_dimension != 0) {
     lots <- lots + 1
   }
 
   for(i in 1:(lots)){
 
-    origin_txt <- gsub(' ', "+", paste0(origin[(1+100*(i-1)):(100*i)][!is.na(origin[(1+100*(i-1)):(100*i)])],collapse='|'))
+    # set up destination request string up to designated number of origins
+    origin_txt <- gsub(' ', "+", paste0(origin[(1+max_dimension*(i-1)):(max_dimension*i)][!is.na(origin[(1+max_dimension*(i-1)):(max_dimension*i)])],collapse='|'))
 
     if(origin_txt == ''){
       break
     }
+
     u <- dist_url(origin_txt,dest,mode,departing,model, api_key=api_key)
+
     if(verbose == TRUE) {
       message('trying url: ', u)
     }
+
     u_secret <- gsub(api_key, '<api_key_here>', u)
+
     if(lots > 1){
       message(glue::glue('Trying URL: {i} of {lots}', ))
     }
+
     doc <- httr::GET(u)
     status <- httr::http_status(doc)
     err <- httr::http_error(doc)
+
     if(err){
       stop(glue::glue('API request failed with error: {status$reason}\n attempted url (api key masked): {u_secret}'))
     }
@@ -95,19 +102,21 @@ distance_from_origins <- function(origin, dest, mode='driving', departing = F, m
 
 
 
-distance_to_destinations <- function(origin,dest,mode,departing=F,model='best_guess',api_key = api_key){
+distance_to_destinations <- function(origin,dest,mode,departing=F,model='best_guess',api_key = api_key, max_dimension = 25){
 
   dists_vec <- c()
   time_vec <- c()
-  lots <- length(dest) %/% 100
 
-  if(length(dest) %% 100 != 0) {
+  # Google Map Distance Matrix Service API only allow 25 destinations per request
+  lots <- length(dest) %/% max_dimension
+
+  if(length(dest) %% max_dimension != 0) {
     lots <- lots + 1
   }
 
   for(i in 1:(lots)){
-    # set up string for up to 100 destinations
-    dest_txt <- gsub(' ',"+",paste0(dest[(1+100*(i-1)):(100*i)][!is.na(dest[(1+100*(i-1)):(100*i)])],collapse='|'))
+    # set up destination request string up to designated number of destinations
+    dest_txt <- gsub(' ',"+",paste0(dest[(1+max_dimension*(i-1)):(max_dimension*i)][!is.na(dest[(1+max_dimension*(i-1)):(max_dimension*i)])],collapse='|'))
     if(dest_txt == ''){
       break
     }
