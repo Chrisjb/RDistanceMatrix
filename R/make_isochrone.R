@@ -95,7 +95,6 @@ make_isochrone <- function(site, time, direction = c('out','in'),
   lats_init <- seq(from= -extents_guess$lat, to = extents_guess$lat, length.out = init_grid_size) + site$lat
   lngs_init <- seq(from= -extents_guess$lng, to = extents_guess$lng, length.out = init_grid_size) + site$lng
 
-
   df_init <- expand.grid(lats_init, lngs_init)
   names(df_init) <- c('lat', 'lng')
 
@@ -154,14 +153,14 @@ make_isochrone <- function(site, time, direction = c('out','in'),
 
   # get bounding box of our google maps initial poly to calibrate the buffers
   bbox <- sf::st_bbox(shp_init)
-  left <- data.frame(lng = bbox[['xmin']], lat =bbox[['ymin']]) %>%
-    sf::st_as_sf(coords = c('lng', 'lat'), crs= 4326)
-  right <- data.frame(lng = bbox[['xmax']], lat =bbox[['ymin']]) %>%
-    sf::st_as_sf(coords = c('lng', 'lat'), crs= 4326)
-  top <- data.frame(lng = bbox[['xmin']], lat =bbox[['ymax']]) %>%
-    sf::st_as_sf(coords = c('lng', 'lat'), crs= 4326)
-  bottom <- data.frame(lng = bbox[['xmin']], lat =bbox[['ymin']]) %>%
-    sf::st_as_sf(coords = c('lng', 'lat'), crs= 4326)
+  left <- data.frame(lng = bbox[['xmin']], lat = bbox[['ymin']]) %>%
+    sf::st_as_sf(coords = c('lng', 'lat'), crs = 4326)
+  right <- data.frame(lng = bbox[['xmax']], lat = bbox[['ymin']]) %>%
+    sf::st_as_sf(coords = c('lng', 'lat'), crs = 4326)
+  top <- data.frame(lng = bbox[['xmin']], lat = bbox[['ymax']]) %>%
+    sf::st_as_sf(coords = c('lng', 'lat'), crs = 4326)
+  bottom <- data.frame(lng = bbox[['xmin']], lat = bbox[['ymin']]) %>%
+    sf::st_as_sf(coords = c('lng', 'lat'), crs = 4326)
   width <- as.numeric(st_distance(left, right))
   height <- as.numeric(st_distance(top, bottom))
 
@@ -172,12 +171,12 @@ make_isochrone <- function(site, time, direction = c('out','in'),
   # find key buffer region where shp_range is the possible region for isochrone extents
   shp_max <- shp_init %>%
     sf::st_transform(27700) %>%
-    sf::st_buffer(buffer_dist)  %>%
+    sf::st_buffer(buffer_dist) %>%
     sf::st_transform(4326)
 
   shp_min <- shp_init %>%
     sf::st_transform(27700) %>%
-    sf::st_buffer(-buffer_dist)  %>%
+    sf::st_buffer(-buffer_dist) %>%
     sf::st_transform(4326)
 
   shp_range <- suppressMessages(
@@ -271,7 +270,7 @@ make_isochrone <- function(site, time, direction = c('out','in'),
   m[is.na(m)] <- time*1.1
 
   contour <- contourLines(x=unique(distance_df$lng), y= unique(distance_df$lat),
-                       z=m, levels = seq(from = 0, to = time, by= time/5 ))
+                       z=m, levels = seq(from = 0, to = time, by = time/5 ))
 
   shp <- maptools::ContourLines2SLDF(contour)
 
