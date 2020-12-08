@@ -7,6 +7,7 @@
 #' @param direction either 'in' or 'out'. In generates an isochrone from multiple origins to the site. Out goes from the site to multiple destinations.
 #' @param detail 'low', 'medium' or 'high' level of detail in the isochrone. High will produce the most granular detail but will use more API credits.
 #' @param mode a character string for the mode of travel. Possible values are 'driving', 'cycling', 'transit', or 'walking'
+#' @param init_grid_size an integer from 2 to 5. Adjust if want to change number of points to pick up in the initial guess stage before adding detail.
 #' @param departing optional parameter for getting distance in traffic. Google maps may route differently to avoid heavy traffic, changing the distance at peak times. If set, takes the format "YYYY-MM-DD HH:MM:SS"
 #' @param google_api_key the google maps API key. This can be generated from the google cloud console and set with set_google_api
 #'
@@ -29,6 +30,7 @@ make_isodistance <- function(site, distance, direction = c('out', 'in'),
                              detail = 'medium',
                              mode= c('driving','walking', 'cycling', 'transit'),
                              departing = FALSE,
+                             init_grid_size = 5,
                              google_api_key = Sys.getenv('google_api_key')){
 
   # validity checks...
@@ -54,8 +56,9 @@ make_isodistance <- function(site, distance, direction = c('out', 'in'),
   # get grid extents
   extents <- approx_grid(site$lat, site$lng, distance/1000)
 
-  lats <- seq(from=-extents$lat, to = extents$lat, length.out = 8) + site$lat
-  lngs <- seq(from=-extents$lng, to = extents$lng, length.out = 8) + site$lng
+  # initial grid size of 5x5, which will make the max dimension requested be 25
+  lats <- seq(from = -extents$lat, to = extents$lat, length.out = init_grid_size) + site$lat
+  lngs <- seq(from = -extents$lng, to = extents$lng, length.out = init_grid_size) + site$lng
 
   distanceDF <- expand.grid(lats, lngs)
   names(distanceDF) <- c('lat', 'lng')
