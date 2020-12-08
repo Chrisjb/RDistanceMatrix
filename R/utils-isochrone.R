@@ -237,7 +237,7 @@ check_request_valid <- function(method, mapbox_api_key, google_api_key, directio
 
     # has the entered time already passed today?
     if(Sys.time() > as.POSIXct(departing)) {
-      stop(paste0('your departure time ', departing, 'is not in the future.'))
+      stop(paste0('your departure time ', departing, ' is not in the future.'))
     }
   }
 

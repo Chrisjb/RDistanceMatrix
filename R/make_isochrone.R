@@ -39,7 +39,7 @@ make_isochrone <- function(site, time, direction = c('out','in'),
                            detail = 'medium', multiplier = 0.8,
                            mode= c('driving','walking', 'cycling', 'transit'),
                            departing = F, method = c('google', 'mapbox', 'google_guess'),
-                           init_grid_size = 10,
+                           init_grid_size = 5,
                            google_api_key = Sys.getenv('google_api_key'),
                            mapbox_api_key = Sys.getenv('mapbox_api_key')){
 
@@ -91,9 +91,10 @@ make_isochrone <- function(site, time, direction = c('out','in'),
   distance_guess <- time * multiplier
   extents_guess <- approx_grid(site$lat, site$lng, distance_guess)
 
-  # initial grid size 10x10
-  lats_init <- seq(from=-extents_guess$lat, to = extents_guess$lat, length.out = init_grid_size) + site$lat
-  lngs_init <- seq(from=-extents_guess$lng, to = extents_guess$lng, length.out = init_grid_size) + site$lng
+  # initial grid size of 5x5, which will make the max dimension requested be 25
+  lats_init <- seq(from= -extents_guess$lat, to = extents_guess$lat, length.out = init_grid_size) + site$lat
+  lngs_init <- seq(from= -extents_guess$lng, to = extents_guess$lng, length.out = init_grid_size) + site$lng
+
 
   df_init <- expand.grid(lats_init, lngs_init)
   names(df_init) <- c('lat', 'lng')
