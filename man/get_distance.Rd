@@ -11,7 +11,8 @@ get_distance(
   mode = c("driving", "walking", "cycling", "transit"),
   departing = FALSE,
   model = c("best_guess", "pessimistic", "optimistic"),
-  google_api_key = Sys.getenv("google_api_key")
+  google_api_key = Sys.getenv("google_api_key"),
+  verbose = FALSE
 )
 }
 \arguments{
@@ -39,12 +40,6 @@ Fetch the distance between sets of origins and destinations using Google Distanc
 \dontrun{
 ## Example with a dataframe of origins (lat lng) and a single destination
 df <- tibble::tribble(
-~ lat, ~lng,
-51.5131, -0.09182,
-51.5037, -0.01715,
-51.5320, -0.12343,
-51.4447, -0.33749
-)
 origin_df <- dplyr::mutate(df, origin = paste0(lat,',',lng))
 
 get_distance(origin_df, origin, 'London Paddington')

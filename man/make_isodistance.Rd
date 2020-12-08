@@ -11,21 +11,24 @@ make_isodistance(
   detail = "medium",
   mode = c("driving", "walking", "cycling", "transit"),
   departing = FALSE,
+  init_grid_size = 5,
   google_api_key = Sys.getenv("google_api_key")
 )
 }
 \arguments{
 \item{site}{either a data.frame with the columns 'lat' and 'lng' or a character string to be geocoded.}
 
-\item{distance}{a numeric value in meters. This is the network distance from the site to the isochrone extents.}
+\item{distance}{a numeric value in meters. This is the network distance from the site to the isodistance extents.}
 
-\item{direction}{either 'in' or 'out'. In generates an isochrone from multiple origins to the site. Out goes from the site to multiple destinations.}
+\item{direction}{either 'in' or 'out'. In generates an isodistance from multiple origins to the site. Out goes from the site to multiple destinations.}
 
-\item{detail}{'low', 'medium' or 'high' level of detail in the isochrone. High will produce the most granular detail but will use more API credits.}
+\item{detail}{'low', 'medium' or 'high' level of detail in the isodistance. High will produce the most granular detail but will use more API credits.}
 
 \item{mode}{a character string for the mode of travel. Possible values are 'driving', 'cycling', 'transit', or 'walking'}
 
 \item{departing}{optional parameter for getting distance in traffic. Google maps may route differently to avoid heavy traffic, changing the distance at peak times. If set, takes the format "YYYY-MM-DD HH:MM:SS"}
+
+\item{init_grid_size}{an integer from 2 to 5. Adjust if want to change number of points to pick up in the initial guess stage before adding detail.}
 
 \item{google_api_key}{the google maps API key. This can be generated from the google cloud console and set with set_google_api}
 }

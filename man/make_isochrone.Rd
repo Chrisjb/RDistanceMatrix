@@ -13,7 +13,7 @@ make_isochrone(
   mode = c("driving", "walking", "cycling", "transit"),
   departing = F,
   method = c("google", "mapbox", "google_guess"),
-  init_grid_size = 10,
+  init_grid_size = 5,
   google_api_key = Sys.getenv("google_api_key"),
   mapbox_api_key = Sys.getenv("mapbox_api_key")
 )
