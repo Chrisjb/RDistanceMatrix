@@ -34,125 +34,143 @@ dist_url <- function(origin, dest, mode, departing = F, model = 'best_guess',
 }
 
 
-distance_from_origins <- function(origin, dest, mode='driving', departing = F, model='best_guess', api_key = api_key, verbose=FALSE) {
-  if(!(mode %in% c('driving','walking','cycle','cycling','bicycle','transit'))){
-    stop('mode must be one of: driving, walking, cycle, transit')
+distance_from_origins <- function(origin, dest, mode = "driving",
+                                  departing = F, model = "best_guess", max_dimension = 25,
+                                  api_key = api_key, verbose = FALSE) {
+
+  if (!(mode %in% c("driving", "walking", "cycle", "cycling", "bicycle", "transit"))) {
+    stop("mode must be one of: driving, walking, cycle, transit")
   }
 
   dists_vec <- c()
   time_vec <- c()
 
-  # split into lots of 100 - google maps can't handle more than that
-  lots <- length(origin) %/% 100
-  if(length(dest) %% 100 != 0) {
+  # Google Map Distance Matrix Service API only allow 25 origins per request
+  lots <- length(origin) %/% max_dimension
+
+  if (length(dest) %% max_dimension != 0) {
     lots <- lots + 1
   }
 
-  for(i in 1:(lots)){
+  for (i in 1:(lots)) {
 
-    origin_txt <- gsub(' ', "+", paste0(origin[(1+100*(i-1)):(100*i)][!is.na(origin[(1+100*(i-1)):(100*i)])],collapse='|'))
+    # set up destination request string up to designated number of origins
+    origin_txt <- gsub(" ", "+", paste0(origin[(1 + max_dimension * (i - 1)):(max_dimension * i)][!is.na(origin[(1 + max_dimension * (i - 1)):(max_dimension * i)])], collapse = "|"))
 
-    if(origin_txt == ''){
+    if (origin_txt == "") {
       break
     }
-    u <- dist_url(origin_txt,dest,mode,departing,model, api_key=api_key)
-    if(verbose == TRUE) {
-      message('trying url: ', u)
+
+    u <- dist_url(origin_txt, dest, mode, departing, model, api_key = api_key)
+
+    if (verbose == TRUE) {
+      message("trying url: ", u)
     }
-    u_secret <- gsub(api_key, '<api_key_here>', u)
-    if(lots > 1){
-      message(glue::glue('Trying URL: {i} of {lots}', ))
+
+    u_secret <- gsub(api_key, "<api_key_here>", u)
+
+    if (lots > 1) {
+      message(glue::glue("Trying URL: {i} of {lots}", ))
     }
+
     doc <- httr::GET(u)
     status <- httr::http_status(doc)
     err <- httr::http_error(doc)
-    if(err){
-      stop(glue::glue('API request failed with error: {status$reason}\n attempted url (api key masked): {u_secret}'))
+
+    if (err) {
+      stop(glue::glue("API request failed with error: {status$reason}\n attempted url (api key masked): {u_secret}"))
     }
+
     x <- httr::content(doc, simplifyVector = TRUE)
-    if(status$category=="Success"  & departing !=F & mode =='driving') {
-      tbl <- lapply(x$rows$elements,function(x) unlist(x) %>% as.data.frame.list(stringsAsFactors = F) ) %>% dplyr::bind_rows()
-      dists_vec <- c(dists_vec,tbl$distance.value)
-      time_vec <- c(time_vec,tbl$duration_in_traffic.value)
-      Sys.sleep(0.1)
 
-    } else if(status$category=="Success") {
-      tbl <- lapply(x$rows$elements,function(x) unlist(x) %>% as.data.frame.list(stringsAsFactors = F) ) %>% dplyr::bind_rows()
-      dists_vec <- c(dists_vec,tbl$distance.value)
-      time_vec <- c(time_vec,tbl$duration.value)
+    if (status$category == "Success" & departing != F & mode == "driving") {
+      tbl <- lapply(x$rows$elements, function(x) unlist(x) %>% as.data.frame.list(stringsAsFactors = F)) %>% dplyr::bind_rows()
+      dists_vec <- c(dists_vec, tbl$distance.value)
+      time_vec <- c(time_vec, tbl$duration_in_traffic.value)
       Sys.sleep(0.1)
-
-    } else{
-      stop(paste0('Error in url: ', u))
+    } else if (status$category == "Success") {
+      tbl <- lapply(x$rows$elements, function(x) unlist(x) %>% as.data.frame.list(stringsAsFactors = F)) %>% dplyr::bind_rows()
+      dists_vec <- c(dists_vec, tbl$distance.value)
+      time_vec <- c(time_vec, tbl$duration.value)
+      Sys.sleep(0.1)
+    } else {
+      stop(paste0("Error in url: ", u))
     }
-
   }
 
-  return(list(dist = dists_vec,
-              time = time_vec))
-
+  return(list(
+    dist = dists_vec,
+    time = time_vec
+  ))
 }
 
 
 
-distance_to_destinations <- function(origin,dest,mode,departing=F,model='best_guess',api_key = api_key){
+distance_to_destinations <- function(origin, dest, mode,
+                                     departing = F, model = "best_guess", max_dimension = 25,
+                                     api_key = api_key) {
 
   dists_vec <- c()
   time_vec <- c()
-  lots <- length(dest) %/% 100
 
-  if(length(dest) %% 100 != 0) {
+  # Google Map Distance Matrix Service API only allow 25 destinations per request
+  lots <- length(dest) %/% max_dimension
+
+  if (length(dest) %% max_dimension != 0) {
     lots <- lots + 1
   }
 
-  for(i in 1:(lots)){
-    # set up string for up to 100 destinations
-    dest_txt <- gsub(' ',"+",paste0(dest[(1+100*(i-1)):(100*i)][!is.na(dest[(1+100*(i-1)):(100*i)])],collapse='|'))
-    if(dest_txt == ''){
+  for (i in 1:(lots)) {
+    # set up destination request string up to designated number of destinations
+    dest_txt <- gsub(" ", "+", paste0(dest[(1 + max_dimension * (i - 1)):(max_dimension * i)][!is.na(dest[(1 + max_dimension * (i - 1)):(max_dimension * i)])], collapse = "|"))
+    if (dest_txt == "") {
       break
     }
 
-    u <- dist_url(origin,dest_txt,mode,departing,model,api_key=api_key)
+    u <- dist_url(origin, dest_txt, mode, departing, model, api_key = api_key)
 
     # don't include ferries in walk directions
-    if(mode == 'walking') {
-    u <- gsub('(.+&mode=[A-Za-z]+)(&key=.+)','\\1&avoid=ferries\\2',u)
+    if (mode == "walking") {
+      u <- gsub("(.+&mode=[A-Za-z]+)(&key=.+)", "\\1&avoid=ferries\\2", u)
     }
 
-    u_secret <- gsub(api_key, '<api_key_here>', u)
-    if(lots > 1){
-      message(glue::glue('Trying URL: {i} of {lots}', ))
+    u_secret <- gsub(api_key, "<api_key_here>", u)
+    if (lots > 1) {
+      message(glue::glue("Trying URL: {i} of {lots}", ))
     }
 
     res <- httr::GET(u)
     err <- httr::http_error(res)
     status <- httr::http_status(res)
-    if(err){
-      stop(glue::glue('API request failed with error: {status$reason}\n attempted url (api key masked): {u_secret}'))
+
+    if (err) {
+      stop(glue::glue("API request failed with error: {status$reason}\n attempted url (api key masked): {u_secret}"))
     }
-    x <- httr::content(res, simplifyVector=TRUE)
+
+    x <- httr::content(res, simplifyVector = TRUE)
 
     # if valid result and we have set departure time for driving, get time in traffic
-    if(status$category=="Success"  & mode=='driving' & departing !=F) {
+    if (status$category == "Success" & mode == "driving" & departing != F) {
       dist <- x$rows$elements[[1]]$distance$value
       time <- x$rows$elements[[1]]$duration_in_traffic$value
-      dists_vec <- c(dists_vec,dist)
-      time_vec <- c(time_vec,time)
+      dists_vec <- c(dists_vec, dist)
+      time_vec <- c(time_vec, time)
       Sys.sleep(0.1)
-    } else if(status$category=="Success") {
+    } else if (status$category == "Success") {
       dist <- x$rows$elements[[1]]$distance$value
       time <- x$rows$elements[[1]]$duration$value
-      dists_vec <- c(dists_vec,dist)
-      time_vec <- c(time_vec,time)
+      dists_vec <- c(dists_vec, dist)
+      time_vec <- c(time_vec, time)
       Sys.sleep(0.1)
     } else {
-      stop(paste0('Error in url: ', u))
+      stop(paste0("Error in url: ", u))
     }
-
   }
 
-  return(list(dist = dists_vec,
-              time = time_vec))
+  return(list(
+    dist = dists_vec,
+    time = time_vec
+  ))
 }
 
 
@@ -228,7 +246,7 @@ check_request_valid <- function(method, mapbox_api_key, google_api_key, directio
 
     # has the entered time already passed today?
     if(Sys.time() > as.POSIXct(departing)) {
-      stop(paste0('your departure time ', departing, 'is not in the future.'))
+      stop(paste0('your departure time ', departing, ' is not in the future.'))
     }
   }
 
