@@ -5,7 +5,9 @@
 #' @param origins a column in our data.frame containing the origin addresses - can be of form 'lat,lng' or address with postcode. Else a string or vector can be passed.
 #' @param destinations a column in our data.frame containing the destination addresses - can be of form 'lat,lng' or address with postcode. Else a string or vector can be passed.
 #' @param mode driving, cycling, transit or walking.
-#' @param departing departure time can be set in format 'YYYY-MM-DD HH:MM:SS'
+#' @param departing departure time can be set in format 'YYYY-MM-DD HH:MM:SS', in the local time of the origin country
+#' @param tz if departure time is set, timezone defaults to the user's timezone as per `Sys.timezone`. Where the timezone of the `site` differs from the user timezone, specify the `site` timezone here.
+#'     tz is a character string that must be a time zone that is recognized by the user's OS.
 #' @param model 'best_guess' is the default model. Google also provides 'optimistic' and 'pessimistic' models. See google distance matrix API documentation.
 #' @param google_api_key google cloud console API key. Ensure this is enabled on the distance matrix API and geocoding API.
 #'
@@ -15,7 +17,7 @@
 #' @importFrom dplyr pull mutate bind_rows
 #' @importFrom glue glue
 #' @importFrom rlang ensym UQ
-#' @import stringr
+#' @import stringr lubridate
 #'
 #' @examples
 #' \dontrun{
@@ -62,6 +64,7 @@
 
 get_distance <- function(data, origins, destinations,
                           mode= c('driving','walking', 'cycling', 'transit'), departing = FALSE,
+                          tz = Sys.timezone(),
                           model = c('best_guess','pessimistic', 'optimistic'),
                           google_api_key = Sys.getenv('google_api_key'),verbose=FALSE) {
   # match args
@@ -89,12 +92,12 @@ get_distance <- function(data, origins, destinations,
 
   # if n_origins is 1, use distance_to_destinations
   if(n_origins ==1){
-    dmat <- distance_to_destinations(origin = origins,dest = destinations, mode=mode, departing=departing, model=model,api_key = google_api_key)
+    dmat <- distance_to_destinations(origin = origins,dest = destinations, mode=mode, departing=departing, tz = tz, model=model,api_key = google_api_key)
   } else if(n_destin ==1){
-    dmat <- distance_from_origins(origin = origins, dest = destinations, mode = mode, departing = departing, model = model, api_key=google_api_key,verbose=verbose)
+    dmat <- distance_from_origins(origin = origins, dest = destinations, mode = mode, departing = departing, tz = tz, model = model, api_key=google_api_key,verbose=verbose)
   } else {
     dmat_list <- apply(data.frame(origins, destinations),MARGIN = 1,
-                  function(x) distance_from_origins(origin = x[['origins']], dest = x[['destinations']], mode = mode, departing = departing, model = model, api_key=google_api_key,verbose=verbose)
+                  function(x) distance_from_origins(origin = x[['origins']], dest = x[['destinations']], mode = mode, departing = departing, tz=tz, model = model, api_key=google_api_key,verbose=verbose)
                   )
     dmat <- dplyr::bind_rows(dmat_list)
   }

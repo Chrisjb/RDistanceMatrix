@@ -10,6 +10,7 @@ get_distance(
   destinations,
   mode = c("driving", "walking", "cycling", "transit"),
   departing = FALSE,
+  tz = Sys.timezone(),
   model = c("best_guess", "pessimistic", "optimistic"),
   google_api_key = Sys.getenv("google_api_key"),
   verbose = FALSE
@@ -24,7 +25,10 @@ get_distance(
 
 \item{mode}{driving, cycling, transit or walking.}
 
-\item{departing}{departure time can be set in format 'YYYY-MM-DD HH:MM:SS'}
+\item{departing}{departure time can be set in format 'YYYY-MM-DD HH:MM:SS', in the local time of the origin country}
+
+\item{tz}{if departure time is set, timezone defaults to the user's timezone as per `Sys.timezone`. Where the timezone of the `site` differs from the user timezone, specify the `site` timezone here.
+tz is a character string that must be a time zone that is recognized by the user's OS.}
 
 \item{model}{'best_guess' is the default model. Google also provides 'optimistic' and 'pessimistic' models. See google distance matrix API documentation.}
 

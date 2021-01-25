@@ -45,16 +45,7 @@ validate_distance_args <- function(google_api_key, direction, site, distance, de
 
   # departure time should be valid, if set
   if(departing != F & !grepl('[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2,}',departing)) {
-    stop(paste0('departure time must either be set to FALSE or a time in the format YYYY-MM-DD HH:MM:SS. Note the time is local UK time.'))
-  } else if(departing != F) {
-    # if departure time is set, set it to a time in the future (later today or tomorrow depending on whether or not the time has already passed today.
-
-    # google maps wants it in the format in time elapsed since 01/01/1970 UTC.
-
-    # has the entered time already passed today?
-    if(Sys.time() > as.POSIXct(departing)) {
-      stop(paste0('your departure time ', departing, 'is not in the future.'))
-    }
+    stop(paste0('departure time must either be set to FALSE or a time in the format YYYY-MM-DD HH:MM:SS. Note the time is local time.'))
   }
 
 

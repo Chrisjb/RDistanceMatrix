@@ -5,20 +5,14 @@ approx_grid <- function(lat,lng,km) {
 }
 
 
-dist_url <- function(origin, dest, mode, departing = F, model = 'best_guess',
+dist_url <- function(origin, dest, mode, departing = F, tz = Sys.timezone(), model = 'best_guess',
                      api_key = api_key) {
 
   # enter departing in form: YYYY-MM-DD 08:00:00
   if(departing != F & !grepl('[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2,}',departing)) {
-    stop(paste0('departure time must either be set to FALSE or a time in the format YYYY-MM-DD HH:MM:SS. Note the time is local UK time.'))
+    stop(paste0('departure time must either be set to FALSE or a time in the format YYYY-MM-DD HH:MM:SS (local time)'))
   } else if(departing != F) {
-    # if departure time is set, set it to a time in the future (later today or tomorrow depending on whether or not the time has already passed today.
-    # has the entered time already passed today?
-    if(Sys.time() > as.POSIXct(departing)) {
-      stop(paste0('your departure time ', departing, 'is not in the future.'))
-    } else {
-      departure_time <- paste0('&departure_time=',as.character(as.numeric(as.POSIXct(departing))),'&traffic_model=', model)
-    }
+      departure_time <- paste0('&departure_time=',as.character(as.numeric(lubridate::ymd_hms(departing, tz=tz))),'&traffic_model=', model)
   } else if(departing == F) {
     departure_time <- ''
   }
@@ -35,7 +29,7 @@ dist_url <- function(origin, dest, mode, departing = F, model = 'best_guess',
 
 
 distance_from_origins <- function(origin, dest, mode = "driving",
-                                  departing = F, model = "best_guess", max_dimension = 25,
+                                  departing = F, tz = Sys.timezone(),  model = "best_guess", max_dimension = 25,
                                   api_key = api_key, verbose = FALSE) {
 
   if (!(mode %in% c("driving", "walking", "cycle", "cycling", "bicycle", "transit"))) {
@@ -61,7 +55,7 @@ distance_from_origins <- function(origin, dest, mode = "driving",
       break
     }
 
-    u <- dist_url(origin_txt, dest, mode, departing, model, api_key = api_key)
+    u <- dist_url(origin_txt, dest, mode, departing, tz, model, api_key = api_key)
 
     if (verbose == TRUE) {
       message("trying url: ", u)
@@ -107,7 +101,7 @@ distance_from_origins <- function(origin, dest, mode = "driving",
 
 
 distance_to_destinations <- function(origin, dest, mode,
-                                     departing = F, model = "best_guess", max_dimension = 25,
+                                     departing = F, tz = Sys.timezone(), model = "best_guess", max_dimension = 25,
                                      api_key = api_key) {
 
   dists_vec <- c()
@@ -127,7 +121,7 @@ distance_to_destinations <- function(origin, dest, mode,
       break
     }
 
-    u <- dist_url(origin, dest_txt, mode, departing, model, api_key = api_key)
+    u <- dist_url(origin, dest_txt, mode, departing, tz, model, api_key = api_key)
 
     # don't include ferries in walk directions
     if (mode == "walking") {
@@ -238,16 +232,15 @@ check_request_valid <- function(method, mapbox_api_key, google_api_key, directio
 
   # departure time should be valid, if set
   if(departing != F & !grepl('[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2,}',departing)) {
-    stop(paste0('departure time must either be set to FALSE or a time in the format YYYY-MM-DD HH:MM:SS. Note the time is local UK time.'))
+    stop(paste0('departure time must either be set to FALSE or a time in the format YYYY-MM-DD HH:MM:SS. Note the time is local time.'))
   } else if(departing != F) {
     # if departure time is set, set it to a time in the future (later today or tomorrow depending on whether or not the time has already passed today.
 
     # google maps wants it in the format in time elapsed since 01/01/1970 UTC.
 
-    # has the entered time already passed today?
-    if(Sys.time() > as.POSIXct(departing)) {
-      stop(paste0('your departure time ', departing, ' is not in the future.'))
-    }
+
+
+
   }
 
 

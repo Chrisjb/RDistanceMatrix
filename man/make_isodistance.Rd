@@ -11,6 +11,7 @@ make_isodistance(
   detail = "medium",
   mode = c("driving", "walking", "cycling", "transit"),
   departing = FALSE,
+  tz = Sys.timezone(),
   init_grid_size = 5,
   google_api_key = Sys.getenv("google_api_key")
 )
@@ -26,7 +27,10 @@ make_isodistance(
 
 \item{mode}{a character string for the mode of travel. Possible values are 'driving', 'cycling', 'transit', or 'walking'}
 
-\item{departing}{optional parameter for getting distance in traffic. Google maps may route differently to avoid heavy traffic, changing the distance at peak times. If set, takes the format "YYYY-MM-DD HH:MM:SS"}
+\item{departing}{optional parameter for getting distance in traffic. Google maps may route differently to avoid heavy traffic, changing the distance at peak times. If set, takes the format "YYYY-MM-DD HH:MM:SS" in the local time of the origin country.}
+
+\item{tz}{if departure time is set, timezone defaults to the user's timezone as per `Sys.timezone`. Where the timezone of the `site` differs from the user timezone, specify the `site` timezone here.
+tz is a character string that must be a time zone that is recognized by the user's OS.}
 
 \item{init_grid_size}{an integer from 2 to 5. Adjust if want to change number of points to pick up in the initial guess stage before adding detail.}
 

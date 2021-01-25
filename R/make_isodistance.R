@@ -8,13 +8,15 @@
 #' @param detail 'low', 'medium' or 'high' level of detail in the isodistance. High will produce the most granular detail but will use more API credits.
 #' @param mode a character string for the mode of travel. Possible values are 'driving', 'cycling', 'transit', or 'walking'
 #' @param init_grid_size an integer from 2 to 5. Adjust if want to change number of points to pick up in the initial guess stage before adding detail.
-#' @param departing optional parameter for getting distance in traffic. Google maps may route differently to avoid heavy traffic, changing the distance at peak times. If set, takes the format "YYYY-MM-DD HH:MM:SS"
+#' @param departing optional parameter for getting distance in traffic. Google maps may route differently to avoid heavy traffic, changing the distance at peak times. If set, takes the format "YYYY-MM-DD HH:MM:SS" in the local time of the origin country.
+#' @param tz if departure time is set, timezone defaults to the user's timezone as per `Sys.timezone`. Where the timezone of the `site` differs from the user timezone, specify the `site` timezone here.
+#'     tz is a character string that must be a time zone that is recognized by the user's OS.
 #' @param google_api_key the google maps API key. This can be generated from the google cloud console and set with set_google_api
 #'
 #'
 #' @return an sf polygon
 #'
-#' @import sf
+#' @import sf lubridate
 #' @importFrom maptools ContourLines2SLDF
 #' @importFrom utils URLencode
 #' @importFrom httr GET content http_error http_status
@@ -30,6 +32,7 @@ make_isodistance <- function(site, distance, direction = c('out', 'in'),
                              detail = 'medium',
                              mode= c('driving', 'walking', 'cycling', 'transit'),
                              departing = FALSE,
+                             tz = Sys.timezone(),
                              init_grid_size = 5,
                              google_api_key = Sys.getenv('google_api_key')){
 
@@ -68,11 +71,11 @@ make_isodistance <- function(site, distance, direction = c('out', 'in'),
   # set up for direction = out
   if(direction == 'out') {
     dists_init <- distance_to_destinations(origin = paste0(site$lat,',',site$lng), dest = df_init$latlng, mode = mode,
-                                           departing = departing, api_key = google_api_key)
+                                           departing = departing, tz=tz, api_key = google_api_key)
     # set up for direction = in
   } else if(direction == 'in'){
     dists_init <- distance_from_origins(origin = df_init$latlng, dest = paste0(site$lat,',',site$lng),
-                                        mode = mode, departing = departing, api_key = google_api_key)
+                                        mode = mode, departing = departing, tz=tz, api_key = google_api_key)
   }
 
   df_init <- dplyr::mutate(df_init, distance = as.numeric(dists_init$dist))
@@ -191,11 +194,11 @@ make_isodistance <- function(site, distance, direction = c('out', 'in'),
   # set up for direction = out
   if(direction == 'out') {
     dists <- distance_to_destinations(origin = paste0(site$lat,',',site$lng), dest = df$latlng, mode = mode,
-                                      departing = departing, api_key = google_api_key)
+                                      departing = departing, tz=tz, api_key = google_api_key)
     # set up for direction = in
   } else if(direction == 'in'){
     dists <- distance_from_origins(origin = df$latlng, dest = paste0(site$lat,',',site$lng),
-                                   mode = mode, departing = departing, api_key = google_api_key)
+                                   mode = mode, departing = departing, tz=tz, api_key = google_api_key)
   }
 
   df <- dplyr::mutate(df, distance = as.numeric(dists$dist))

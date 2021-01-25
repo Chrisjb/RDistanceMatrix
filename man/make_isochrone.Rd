@@ -13,6 +13,7 @@ make_isochrone(
   mode = c("driving", "walking", "cycling", "transit"),
   departing = F,
   method = c("google", "mapbox", "google_guess"),
+  tz = Sys.timezone(),
   init_grid_size = 5,
   google_api_key = Sys.getenv("google_api_key"),
   mapbox_api_key = Sys.getenv("mapbox_api_key")
@@ -31,9 +32,13 @@ make_isochrone(
 
 \item{mode}{a character string for the mode of travel. Possible values are 'driving', 'cycling', 'transit', or 'walking'}
 
-\item{departing}{departure time can be set if we know the departure time and want to take into account traffic in the network for driving or transit modes. Departing should always be set to FALSE for walking or cycling modes. If required, departure time should be specified in the format 'YYYY-MM-DD HH:MM:SS'.}
+\item{departing}{departure time can be set if we know the departure time and want to take into account traffic in the network for driving or transit modes.
+Departing should always be set to FALSE for walking or cycling modes. If required, departure time should be specified in the format 'YYYY-MM-DD HH:MM:SS', in the local time of the origin country}
 
 \item{method}{eithing 'google' or 'mapbox' method for generating isochrones. Read the vingette for more details. 'google_guess' is also available to tune the multiplier parameter.}
+
+\item{tz}{if departure time is set, timezone defaults to the user's timezone as per `Sys.timezone`. Where the timezone of the `site` differs from the user timezone, specify the `site` timezone here.
+tz is a character string that must be a time zone that is recognized by the user's OS.}
 
 \item{init_grid_size}{used for method='google' - adjust if we want to pick up more points in the 'google_guess' stage before adding detail. Useful for longer travel times (>60mins).}
 
