@@ -77,6 +77,11 @@ distance_from_origins <- function(origin, dest, mode = "driving",
 
     x <- httr::content(doc, simplifyVector = TRUE)
 
+    if(x$status =='INVALID_REQUEST'){
+      stop(x$error_message)
+    }
+
+
     if (status$category == "Success" & departing != F & mode == "driving") {
       tbl <- lapply(x$rows$elements, function(x) unlist(x) %>% as.data.frame.list(stringsAsFactors = F)) %>% dplyr::bind_rows()
       dists_vec <- c(dists_vec, tbl$distance.value)
@@ -142,6 +147,10 @@ distance_to_destinations <- function(origin, dest, mode,
     }
 
     x <- httr::content(res, simplifyVector = TRUE)
+
+    if(x$status =='INVALID_REQUEST'){
+      stop(x$error_message)
+    }
 
     # if valid result and we have set departure time for driving, get time in traffic
     if (status$category == "Success" & mode == "driving" & departing != F) {
