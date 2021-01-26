@@ -181,7 +181,7 @@ distance_to_destinations <- function(origin, dest, mode,
 
 
 
-check_request_valid <- function(method, mapbox_api_key, google_api_key, direction, site, time, detail, mode, departing, init_grid_size, multiplier) {
+check_request_valid <- function(method, mapbox_api_key, google_api_key, direction, site, time, detail, mode, departing, tz, init_grid_size, multiplier) {
   # ensure API Key is correct
   if(method %in% c('google','google_guess') ){
     assign('api_key', google_api_key, envir = parent.frame())
